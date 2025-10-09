@@ -43,6 +43,9 @@ pub enum Token {
     BoolKw,   // bool keyword
     ListKw,   // list keyword
     StrKw,    // str keyword
+    WhileKw,  // while keyword
+    ForKw,    // for keyword
+    InKw,     // in keyword
 
 	// other
 	Comma, // ,
@@ -98,6 +101,9 @@ pub fn keywords() -> HashMap<&'static str, Token> {
     map.insert("bool", Token::BoolKw);
     map.insert("list", Token::ListKw);
     map.insert("str", Token::StrKw);
+    map.insert("while", Token::WhileKw);
+    map.insert("for", Token::ForKw);
+    map.insert("in", Token::InKw);
     map.insert("true", Token::Bool(true));
     map.insert("false", Token::Bool(false));
     map

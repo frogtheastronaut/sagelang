@@ -29,6 +29,18 @@ impl<'a> Parser<'a> {
                 self.advance();
                 Expr::Bool(val)
             }
+            Token::List(items) => {
+                // Convert Vec<Token> to Vec<Expr>
+                let expr_items = items.iter().map(|tok| match tok {
+                    Token::Number(n) => Expr::Number(*n),
+                    Token::StringLit(s) => Expr::StringLit(s.clone()),
+                    Token::Bool(b) => Expr::Bool(*b),
+                    Token::Identifier(id) => Expr::Identifier(id.clone()),
+                    _ => panic!("Unsupported list element: {:?}", tok),
+                }).collect();
+                self.advance();
+                Expr::List(expr_items)
+            }
             Token::LBracket => {
                 self.advance();
                 let mut items = Vec::new();
