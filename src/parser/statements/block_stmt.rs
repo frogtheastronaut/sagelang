@@ -11,6 +11,13 @@ impl<'a> Parser<'a> {
 
         let mut stmts = Vec::new();
         while self.current != Token::CloseBrace && self.current != Token::EOF {
+            // skip any extra semicolons between statements
+            while self.current == Token::Semicolon {
+                self.advance();
+            }
+            if self.current == Token::CloseBrace || self.current == Token::EOF {
+                break;
+            }
             stmts.push(self.statement());
         }
 
