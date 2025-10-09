@@ -20,21 +20,30 @@ impl<'a> Parser<'a> {
         let mut params = Vec::new();
         if self.current != Token::RParen {
             loop {
-                // accept type keyword before parameter name
-                match &self.current {
-                    Token::NumKw | Token::BoolKw | Token::StrKw | Token::ListKw => {
-                        self.advance(); // skip type
-                        match &self.current {
-                            Token::Identifier(id) => params.push(id.clone()),
-                            _ => panic!("Expected identifier after type in function parameters"),
+                let param_type = match &self.current {
+                    Token::NumKw => "num",
+                    Token::BoolKw => "bool",
+                    Token::StrKw => "str",
+                    Token::ListKw => "list",
+                    _ => "",
+                };
+                if param_type != "" {
+                    self.advance(); // skip type
+                    match &self.current {
+                        Token::Identifier(id) => {
+                            params.push(crate::parser::ast::Param { param_name: id.clone(), param_type: param_type.to_string() });
                         }
-                        self.advance();
+                        _ => panic!("Expected identifier after type in function parameters"),
                     }
-                    Token::Identifier(id) => {
-                        params.push(id.clone());
-                        self.advance();
+                    self.advance();
+                } else {
+                    match &self.current {
+                        Token::Identifier(id) => {
+                            params.push(crate::parser::ast::Param { param_name: id.clone(), param_type: String::new() });
+                        }
+                        _ => panic!("Expected identifier in function parameters"),
                     }
-                    _ => panic!("Expected identifier in function parameters"),
+                    self.advance();
                 }
 
                 if self.current == Token::Comma {

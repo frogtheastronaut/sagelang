@@ -5,6 +5,13 @@ use crate::lexer::tokens::Token;
 
 #[derive(Debug, Clone)]
 #[allow(dead_code)]
+pub struct Param {
+    pub param_name: String,
+    pub param_type: String,
+}
+
+#[derive(Debug, Clone)]
+#[allow(dead_code)]
 pub enum Expr {
     Number(f64),
 
@@ -55,7 +62,7 @@ pub enum Stmt {
     },
     Function {
         name: String,
-        params: Vec<String>,
+        params: Vec<Param>,
         body: Vec<Stmt>,
     },
     If {

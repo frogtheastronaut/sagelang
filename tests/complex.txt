@@ -17,6 +17,6 @@ if (x >= 5) {
 
 }
 
-function test(num x) {
+function test(num x, bool unused, str literal) {
     return x == 5;
 }
