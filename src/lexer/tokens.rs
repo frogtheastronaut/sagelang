@@ -43,8 +43,6 @@ pub enum Token {
     BoolKw,   // bool keyword
     ListKw,   // list keyword
     StrKw,    // str keyword
-    TrueKw,   // true keyword
-    FalseKw,  // false keyword
 
 	// other
 	Comma, // ,
