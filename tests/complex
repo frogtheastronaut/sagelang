@@ -2,5 +2,5 @@ let x = 10;
 if x >= 5 {
     return x == 10;
 } else {
-    fn test() {}
+    function test() {}
 }

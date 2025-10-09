@@ -1,4 +1,5 @@
 mod lexer;
+mod parser;
 
 use std::fs;
 use std::env;
@@ -20,13 +21,8 @@ fn main() {
     // create the lexer and tokenizer
     let mut lexer = lexer::Lexer::new(&contents);
     let mut tokenizer = lexer::Tokenizer::new(&mut lexer);
+    let mut parser = parser::Parser::new(&mut tokenizer);
 
-    // run the tokenizer loop
-    loop {
-        let tok = tokenizer.next_token();
-        println!("{:?}", tok);
-        if tok == lexer::Token::EOF {
-            break;
-        }
-    }
+    let ast = parser.parse();
+    println!("{:#?}", ast);
 }

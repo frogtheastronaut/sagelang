@@ -11,7 +11,6 @@ pub enum Token {
     Minus,
     Star,
     Slash,
-    Eq,          // =
     EqEq,        // ==
     NotEq,       // !=
     Less,        // <
@@ -27,6 +26,7 @@ pub enum Token {
     RParen,
     Colon,
     Quote,
+	Assign, // =
 
     // keywords
     Let,
@@ -34,6 +34,10 @@ pub enum Token {
     If,
     Else,
     Return,
+
+	// other
+	Comma, // ,
+	Dot,   // .
 
     // EOF
     EOF,
@@ -50,12 +54,14 @@ pub fn default_symbol_map() -> HashMap<char, Token> {
     map.insert(')', Token::RParen);
     map.insert(':', Token::Colon);
     map.insert('\'', Token::Quote);
-	map.insert('=', Token::Eq);
+	map.insert('=', Token::Assign);
 	map.insert('<', Token::Less);
 	map.insert('>', Token::Greater);
 	map.insert(';', Token::Semicolon);
 	map.insert('{', Token::OpenBrace);
 	map.insert('}', Token::CloseBrace);
+	map.insert(',', Token::Comma);
+	map.insert('.', Token::Dot);
     map
 }
 
@@ -73,7 +79,7 @@ pub fn multi_char_ops() -> HashMap<&'static str, Token> {
 pub fn keywords() -> HashMap<&'static str, Token> {
     let mut map = HashMap::new();
     map.insert("let", Token::Let);
-    map.insert("fn", Token::Fn);
+    map.insert("function", Token::Fn);
     map.insert("if", Token::If);
     map.insert("else", Token::Else);
     map.insert("return", Token::Return);
