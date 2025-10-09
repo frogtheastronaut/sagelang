@@ -1,6 +1,11 @@
 let x = 10;
-if x >= 5 {
+if (x >= 5) {
     return x == 10;
 } else {
-    function test() {}
+    x = 5;
+    return test(x);
+}
+
+function test(num x) {
+    return x == 5;
 }

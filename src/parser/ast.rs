@@ -7,6 +7,9 @@ use crate::lexer::tokens::Token;
 pub enum Expr {
     Number(f64),
     Identifier(String),
+    StringLit(String),
+    Bool(bool),
+    List(Vec<Expr>),
     UnaryOp {
         op: Token,
         right: Box<Expr>,
@@ -26,6 +29,10 @@ pub enum Expr {
 #[derive(Debug, Clone)]
 pub enum Stmt {
     VarDecl {
+        name: String,
+        value: Expr,
+    },
+    Assign {
         name: String,
         value: Expr,
     },

@@ -14,13 +14,32 @@ impl<'a> Parser<'a> {
                 Expr::Identifier(id)
             }
             Token::LParen => self.grouping(),
-            Token::Number(_) => {
-                let num = match &self.current {
-                    Token::Number(n) => *n,
-                    _ => unreachable!(),
-                };
+            Token::Number(n) => {
+                let num = *n;
                 self.advance();
                 Expr::Number(num)
+            }
+            Token::StringLit(s) => {
+                let val = s.clone();
+                self.advance();
+                Expr::StringLit(val)
+            }
+            Token::Bool(b) => {
+                let val = *b;
+                self.advance();
+                Expr::Bool(val)
+            }
+            Token::LBracket => {
+                self.advance();
+                let mut items = Vec::new();
+                while self.current != Token::RBracket && self.current != Token::EOF {
+                    items.push(self.expr());
+                    if self.current == Token::Comma {
+                        self.advance();
+                    }
+                }
+                self.eat(Token::RBracket);
+                Expr::List(items)
             }
             _ => panic!("Unexpected token in call: {:?}", self.current),
         };

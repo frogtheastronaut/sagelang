@@ -74,7 +74,7 @@ impl<'a> Tokenizer<'a> {
             None
         }
     }
-	// get next token
+    // get next token
     pub fn next_token(&mut self) -> Token {
         self.lexer.skip_whitespace();
 
@@ -83,6 +83,20 @@ impl<'a> Tokenizer<'a> {
         }
 
         match self.lexer.current_char() {
+            Some('"') => self.string_lit(),
+            Some('t') | Some('f') => {
+                // could be true/false
+                let id = self.identifier();
+                if let Token::Identifier(ref s) = id {
+                    if s == "true" {
+                        return Token::Bool(true);
+                    } else if s == "false" {
+                        return Token::Bool(false);
+                    }
+                }
+                id
+            }
+            Some('[') => self.list_lit(),
             Some(c) if c.is_ascii_digit() => self.number(),
             Some(c) if c.is_alphabetic() || c == '_' => self.identifier(),
             Some(c) => {
@@ -90,11 +104,59 @@ impl<'a> Tokenizer<'a> {
                     self.lexer.advance();
                     tok.clone()
                 } else {
-					// dunno what this char is
                     panic!("Unexpected character: {}", c);
                 }
             }
             None => Token::EOF,
         }
+    }
+
+    // parse string literals
+    fn string_lit(&mut self) -> Token {
+        self.lexer.advance(); // skip opening quote
+        let mut s = String::new();
+        while let Some(c) = self.lexer.current_char() {
+            if c == '"' {
+                self.lexer.advance();
+                break;
+            } else if c == '\\' {
+                self.lexer.advance();
+                if let Some(esc) = self.lexer.current_char() {
+                    s.push(esc);
+                    self.lexer.advance();
+                }
+            } else {
+                s.push(c);
+                self.lexer.advance();
+            }
+        }
+        Token::StringLit(s)
+    }
+
+    // parse list literals
+    fn list_lit(&mut self) -> Token {
+        self.lexer.advance(); // skip [
+        let mut items = Vec::new();
+        loop {
+            self.lexer.skip_whitespace();
+            if let Some(c) = self.lexer.current_char() {
+                if c == ']' {
+                    self.lexer.advance();
+                    break;
+                }
+                // parse item (number, string, bool, identifier)
+                let item = self.next_token();
+                if item != Token::RBracket && item != Token::EOF {
+                    items.push(item);
+                }
+                self.lexer.skip_whitespace();
+                if let Some(',') = self.lexer.current_char() {
+                    self.lexer.advance();
+                }
+            } else {
+                break;
+            }
+        }
+        Token::List(items)
     }
 }

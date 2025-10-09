@@ -16,6 +16,18 @@ impl<'a> Parser<'a> {
             Token::If => self.if_stmt(),
             Token::Return => self.return_stmt(),
             Token::OpenBrace => Stmt::Block(self.block_stmt()),
+            Token::Identifier(_) => {
+                // assignment: identifier = expr;
+                let name = match &self.current {
+                    Token::Identifier(id) => id.clone(),
+                    _ => unreachable!(),
+                };
+                self.advance();
+                self.eat(Token::Assign);
+                let value = self.expr();
+                self.eat(Token::Semicolon);
+                Stmt::Assign { name, value }
+            }
             _ => Stmt::ExprStmt(self.expr()),
         }
     }

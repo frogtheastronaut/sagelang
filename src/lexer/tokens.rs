@@ -5,6 +5,9 @@ pub enum Token {
     // literals
     Number(f64),
     Identifier(String),
+    StringLit(String),
+    Bool(bool), // literal value: true/false
+    List(Vec<Token>),
 
     // ops
     Plus,
@@ -27,6 +30,8 @@ pub enum Token {
     Colon,
     Quote,
 	Assign, // =
+    LBracket, // [
+    RBracket, // ]
 
     // keywords
     Let,
@@ -34,6 +39,12 @@ pub enum Token {
     If,
     Else,
     Return,
+    NumKw,    // num keyword
+    BoolKw,   // bool keyword
+    ListKw,   // list keyword
+    StrKw,    // str keyword
+    TrueKw,   // true keyword
+    FalseKw,  // false keyword
 
 	// other
 	Comma, // ,
@@ -60,6 +71,8 @@ pub fn default_symbol_map() -> HashMap<char, Token> {
 	map.insert(';', Token::Semicolon);
 	map.insert('{', Token::OpenBrace);
 	map.insert('}', Token::CloseBrace);
+    map.insert('[', Token::LBracket);
+    map.insert(']', Token::RBracket);
 	map.insert(',', Token::Comma);
 	map.insert('.', Token::Dot);
     map
@@ -83,5 +96,11 @@ pub fn keywords() -> HashMap<&'static str, Token> {
     map.insert("if", Token::If);
     map.insert("else", Token::Else);
     map.insert("return", Token::Return);
+    map.insert("num", Token::NumKw);
+    map.insert("bool", Token::BoolKw);
+    map.insert("list", Token::ListKw);
+    map.insert("str", Token::StrKw);
+    map.insert("true", Token::Bool(true));
+    map.insert("false", Token::Bool(false));
     map
 }
