@@ -7,8 +7,10 @@ use crate::lexer::tokens::{Token};
 
 impl<'a> Parser<'a> {
     pub fn block_stmt(&mut self) -> Vec<Stmt> {
+        // eat {
         self.eat(Token::OpenBrace);
 
+        // parse statements until we hit }
         let mut stmts = Vec::new();
         while self.current.token != Token::CloseBrace && self.current.token != Token::EOF {
             // skip any extra semicolons between statements
@@ -20,8 +22,10 @@ impl<'a> Parser<'a> {
             }
             stmts.push(self.statement());
         }
-
+        // eat }
         self.eat(Token::CloseBrace);
+
+        // return the parsed statements
         stmts
     }
 }

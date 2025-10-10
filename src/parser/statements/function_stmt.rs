@@ -7,16 +7,20 @@ use crate::lexer::tokens::{Token};
 
 impl<'a> Parser<'a> {
     pub fn function_stmt(&mut self) -> Stmt {
+        // eat function
         self.eat(Token::Fn);
 
+        // this is the function name
         let name = match &self.current.token {
             Token::Identifier(id) => id.clone(),
             _ => panic!("Expected function name at line {}", self.current.line),
         };
         self.advance();
 
+        // eat (
         self.eat(Token::LParen);
 
+        // this is the parameter list
         let mut params = Vec::new();
         if self.current.token != Token::RParen {
             loop {
@@ -54,10 +58,13 @@ impl<'a> Parser<'a> {
                 }
             }
         }
-
+        // eat )
         self.eat(Token::RParen);
+
+        // this is the block {}
         let body = self.block_stmt();
 
+        // return function
         Stmt::Function { name, params, body }
     }
 }
