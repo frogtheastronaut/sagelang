@@ -1,6 +1,7 @@
 pub struct Lexer {
     pub input: Vec<char>,
     pub pos: usize,
+    pub line: usize,
 }
 
 impl Lexer {
@@ -8,6 +9,7 @@ impl Lexer {
         Lexer {
             input: input.chars().collect(),
             pos: 0,
+            line: 1,
         }
     }
 	// get char at current position
@@ -20,6 +22,11 @@ impl Lexer {
     }
 	// advance
     pub fn advance(&mut self) {
+        if let Some(c) = self.current_char() {
+            if c == '\n' {
+                self.line += 1;
+            }
+        }
         self.pos += 1;
     }
 	// skip whitespace

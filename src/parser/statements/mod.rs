@@ -9,11 +9,11 @@ pub mod print_stmt;
 
 use crate::parser::Parser;
 use crate::parser::ast::Stmt;
-use crate::lexer::tokens::Token;
+use crate::lexer::tokens::{Token};
 
 impl<'a> Parser<'a> {
     pub fn statement(&mut self) -> Stmt {
-        match &self.current {
+        match &self.current.token {
             Token::Let => self.let_stmt(),
             Token::Fn => self.function_stmt(),
             Token::If => self.if_stmt(),
@@ -23,8 +23,7 @@ impl<'a> Parser<'a> {
             Token::ForKw => self.for_stmt(),
             Token::PrintKw => self.print_stmt(),
             Token::Identifier(_) => {
-                // assignment: identifier = expr;
-                let name = match &self.current {
+                let name = match &self.current.token {
                     Token::Identifier(id) => id.clone(),
                     _ => unreachable!(),
                 };

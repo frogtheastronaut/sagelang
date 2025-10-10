@@ -1,5 +1,13 @@
 use std::collections::HashMap;
 
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct CurrentToken {
+    pub token: Token,
+    pub line: usize,
+}
+
+
 #[derive(Debug, PartialEq, Clone)]
 pub enum Token {
     // literals
@@ -15,6 +23,12 @@ pub enum Token {
     Star,
     Percent, // %, modulo operator
     Slash,
+    EqEq,        // ==
+    NotEq,       // !=
+    Less,        // <
+    LessEq,      // <=
+    Greater,     // >
+    GreaterEq,   // >=
     Semicolon,   // ;
     OpenBrace,   // {
     CloseBrace,  // }
@@ -27,16 +41,6 @@ pub enum Token {
     Assign, // =
     LBracket, // [
     RBracket, // ]
-
-    // logical ops
-    And,
-    Or,
-    EqEq,        // ==
-    NotEq,       // !=
-    Less,        // <
-    LessEq,      // <=
-    Greater,     // >
-    GreaterEq,   // >=
 
     // keywords
     Let,
@@ -53,7 +57,8 @@ pub enum Token {
     ForKw,    // for keyword
     InKw,     // in keyword
     PrintKw,
-
+    And,
+    Or,
 
     // other
     Comma, // ,

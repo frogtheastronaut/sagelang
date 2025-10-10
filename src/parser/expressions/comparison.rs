@@ -9,8 +9,8 @@ impl<'a> Parser<'a> {
     pub fn comparison(&mut self) -> Expr {
         let mut node = self.term();
 
-        while matches!(self.current, Token::Less | Token::LessEq | Token::Greater | Token::GreaterEq) {
-            let op = self.current.clone();
+        while matches!(self.current.token, Token::Less | Token::LessEq | Token::Greater | Token::GreaterEq) {
+            let op = self.current.token.clone();
             self.advance();
             let right = self.term();
             node = Expr::BinaryOp {

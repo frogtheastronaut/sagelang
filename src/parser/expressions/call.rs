@@ -7,7 +7,7 @@ use crate::lexer::tokens::Token;
 
 impl<'a> Parser<'a> {
     pub fn call(&mut self) -> Expr {
-        let mut expr = match &self.current {
+        let mut expr = match &self.current.token {
             Token::Identifier(name) => {
                 let id = name.clone();
                 self.advance();
@@ -44,9 +44,9 @@ impl<'a> Parser<'a> {
             Token::LBracket => {
                 self.advance();
                 let mut items = Vec::new();
-                while self.current != Token::RBracket && self.current != Token::EOF {
+                while self.current.token != Token::RBracket && self.current.token != Token::EOF {
                     items.push(self.expr());
-                    if self.current == Token::Comma {
+                    if self.current.token == Token::Comma {
                         self.advance();
                     }
                 }
@@ -54,17 +54,17 @@ impl<'a> Parser<'a> {
                 Expr::List(items)
             }
             Token::ElseIfKw | Token::If | Token::Let | Token::Fn | Token::Return | Token::WhileKw | Token::ForKw | Token::PrintKw | Token::Else => {
-                panic!("Unexpected statement keyword in expression: {:?}", self.current)
+                panic!("Unexpected statement keyword in expression: {:?} at line {}", self.current.token, self.current.line)
             }
-            _ => panic!("Unexpected token in call: {:?}", self.current),
+            _ => panic!("Unexpected token in call: {:?} at line {}", self.current.token, self.current.line),
         };
 
-        while self.current == Token::LParen {
+        while self.current.token == Token::LParen {
             self.advance();
             let mut args = Vec::new();
-            if self.current != Token::RParen {
+            if self.current.token != Token::RParen {
                 args.push(self.expr());
-                while self.current == Token::Comma {
+                while self.current.token == Token::Comma {
                     self.advance();
                     args.push(self.expr());
                 }

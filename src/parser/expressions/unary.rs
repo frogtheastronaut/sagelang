@@ -7,8 +7,8 @@ use crate::lexer::tokens::Token;
 
 impl<'a> Parser<'a> {
     pub fn unary(&mut self) -> Expr {
-        if matches!(self.current, Token::Plus | Token::Minus) {
-            let op = self.current.clone();
+        if matches!(self.current.token, Token::Plus | Token::Minus) {
+            let op = self.current.token.clone();
             self.advance();
             let right = self.unary();
             return Expr::UnaryOp {

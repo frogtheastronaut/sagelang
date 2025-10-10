@@ -3,7 +3,7 @@
  */
 use crate::parser::Parser;
 use crate::parser::ast::Stmt;
-use crate::lexer::tokens::Token;
+use crate::lexer::tokens::{Token};
 
 impl<'a> Parser<'a> {
     pub fn while_stmt(&mut self) -> Stmt {

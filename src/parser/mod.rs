@@ -4,11 +4,11 @@ pub mod ast;
 
 use crate::lexer::tokenizer::Tokenizer;
 use crate::parser::ast::Stmt;
-use crate::lexer::tokens::Token;
+use crate::lexer::tokens::{Token, CurrentToken};
 
 pub struct Parser<'a> {
     pub tokenizer: &'a mut Tokenizer<'a>,
-    pub current: Token,
+    pub current: CurrentToken,
 }
 
 impl<'a> Parser<'a> {
@@ -19,7 +19,7 @@ impl<'a> Parser<'a> {
 
     pub fn parse(&mut self) -> Vec<Stmt> {
         let mut stmts = Vec::new();
-        while self.current != Token::EOF {
+        while self.current.token != Token::EOF {
             stmts.push(self.statement());
         }
         stmts
@@ -30,10 +30,10 @@ impl<'a> Parser<'a> {
     }
 
     pub fn eat(&mut self, expected: Token) {
-        if std::mem::discriminant(&self.current) == std::mem::discriminant(&expected) {
+        if std::mem::discriminant(&self.current.token) == std::mem::discriminant(&expected) {
             self.advance();
         } else {
-            panic!("Expected {:?}, got {:?}", expected, self.current);
+            panic!("Expected {:?}, got {:?} at line {}", expected, self.current.token, self.current.line);
         }
     }
 }

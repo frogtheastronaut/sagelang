@@ -1,5 +1,5 @@
 use crate::lexer::Lexer;
-use crate::lexer::tokens::{Token, default_symbol_map, multi_char_ops, keywords};
+use crate::lexer::tokens::{Token, CurrentToken, default_symbol_map, multi_char_ops, keywords};
 use std::collections::HashMap;
 
 pub struct Tokenizer<'a> {
@@ -27,7 +27,7 @@ impl<'a> Tokenizer<'a> {
             if c.is_ascii_digit() {
                 num_str.push(c);
             } else if c == '.' && !has_dot {
-				// we realise that the number is a float
+				// number has decimal point
                 has_dot = true;
                 num_str.push(c);
             } else {
@@ -77,23 +77,21 @@ impl<'a> Tokenizer<'a> {
         }
     }
     // get next token
-    pub fn next_token(&mut self) -> Token {
+    pub fn next_token(&mut self) -> CurrentToken {
         self.lexer.skip_whitespace();
-
+        let line = self.lexer.line;
         if let Some(tok) = self.multi_char_op() {
-            return tok;
+            return CurrentToken { token: tok, line };
         }
-
-        match self.lexer.current_char() {
+        let token = match self.lexer.current_char() {
             Some('"') => self.string_lit(),
             Some('t') | Some('f') => {
-                // could be true/false
                 let id = self.identifier();
                 if let Token::Identifier(ref s) = id {
                     if s == "true" {
-                        return Token::Bool(true);
+                        return CurrentToken { token: Token::Bool(true), line };
                     } else if s == "false" {
-                        return Token::Bool(false);
+                        return CurrentToken { token: Token::Bool(false), line };
                     }
                 }
                 id
@@ -106,11 +104,12 @@ impl<'a> Tokenizer<'a> {
                     self.lexer.advance();
                     tok.clone()
                 } else {
-                    panic!("Unexpected character: {}", c);
+                    panic!("Unexpected character: {} at line {}", c, line);
                 }
             }
             None => Token::EOF,
-        }
+        };
+        CurrentToken { token, line }
     }
 
     // parse string literals
@@ -148,8 +147,8 @@ impl<'a> Tokenizer<'a> {
                 }
                 // parse item (number, string, bool, identifier)
                 let item = self.next_token();
-                if item != Token::RBracket && item != Token::EOF {
-                    items.push(item);
+                if item.token != Token::RBracket && item.token != Token::EOF {
+                    items.push(item.token);
                 }
                 self.lexer.skip_whitespace();
                 if let Some(',') = self.lexer.current_char() {
