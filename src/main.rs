@@ -1,5 +1,6 @@
 mod lexer;
 mod parser;
+mod compiler;
 
 use std::fs;
 use std::env;
@@ -24,5 +25,15 @@ fn main() {
     let mut parser = parser::Parser::new(&mut tokenizer);
 
     let ast = parser.parse();
-    println!("{:#?}", ast);
+    let mut compiler = compiler::Compiler { bytecode: compiler::Bytecode { instructions: vec![] } };
+    compiler.compile_stmts(&ast);
+
+    // write bytecode to bytecode.txt
+    let bytecode_str = compiler.bytecode.instructions.iter()
+        .map(|instr| compiler::format_instruction(instr))
+        .collect::<Vec<_>>()
+        .join("\n");
+    fs::write("bytecode.txt", bytecode_str).expect("Failed to write bytecode");
+
+    // VM logic removed. Only output bytecode to bytecode.txt
 }
