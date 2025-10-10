@@ -1,5 +1,5 @@
 /*
- * parser for if statements.
+ * parser for if, else and elseif statements.
  */
 use crate::parser::Parser;
 use crate::parser::ast::Stmt;

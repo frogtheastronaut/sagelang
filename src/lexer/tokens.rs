@@ -15,12 +15,6 @@ pub enum Token {
     Star,
     Percent, // %, modulo operator
     Slash,
-    EqEq,        // ==
-    NotEq,       // !=
-    Less,        // <
-    LessEq,      // <=
-    Greater,     // >
-    GreaterEq,   // >=
     Semicolon,   // ;
     OpenBrace,   // {
     CloseBrace,  // }
@@ -33,6 +27,16 @@ pub enum Token {
     Assign, // =
     LBracket, // [
     RBracket, // ]
+
+    // logical ops
+    And,
+    Or,
+    EqEq,        // ==
+    NotEq,       // !=
+    Less,        // <
+    LessEq,      // <=
+    Greater,     // >
+    GreaterEq,   // >=
 
     // keywords
     Let,
@@ -49,7 +53,7 @@ pub enum Token {
     ForKw,    // for keyword
     InKw,     // in keyword
     PrintKw,
-    And,
+
 
     // other
     Comma, // ,
@@ -93,7 +97,8 @@ pub fn multi_char_ops() -> HashMap<&'static str, Token> {
     map.insert(">=", Token::GreaterEq);
     map.insert("<=", Token::LessEq);
     map.insert("..", Token::DotDot);
-    map.insert("and", Token::And);
+    map.insert("&&", Token::And);
+    map.insert("||", Token::Or);
     map
 }
 

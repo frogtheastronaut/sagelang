@@ -8,8 +8,11 @@ if (x >= 5) {
     return x == 10;
 } else {
     for (x in list_test) {
-        x = 5;
-        return test(x);
+        if (x == x || x == x) {
+            x = 5;
+            return test(x);
+        }
+
     }
     while (x > 5) {
         return test(x);
