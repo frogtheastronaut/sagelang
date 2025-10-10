@@ -5,11 +5,11 @@ pub enum Instruction {
     Sub,
     Mul,
     Div,
+    Modulo,
     Store(String),    // Store value into variable
     Load(String),     // Load variable value onto stack
     JumpIfFalse(usize), // Conditional jump
     Jump(usize),      // Unconditional jump
-    Call(String),     // Call function
     Return,
     Print,
     PushString(String),

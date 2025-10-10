@@ -74,18 +74,48 @@ impl Compiler {
             }
             Stmt::While { condition, body } => {
                 let cond_pos = self.bytecode.instructions.len();
+
+                // condition
                 self.compile_expr(condition);
+
                 let jump_if_false_pos = self.bytecode.instructions.len();
                 self.bytecode.instructions.push(Instruction::JumpIfFalse(0));
+
+                // loop body
                 self.compile_stmts(body);
+
+                // jump back to condition
                 self.bytecode.instructions.push(Instruction::Jump(cond_pos));
+
+                // patch jump target
                 let after_body = self.bytecode.instructions.len();
                 self.bytecode.instructions[jump_if_false_pos] = Instruction::JumpIfFalse(after_body);
             }
             Stmt::For { var, iterable, body } => {
-                // For simplicity, treat iterable as a number (range)
-                // let i = 0; while i < iterable { body; i = i + 1 }
-                // removed unused start_pos
+                // handle .. operator for ranges
+                if let Expr::BinaryOp { left, op, right } = iterable {
+                    if *op == Token::DotDot {
+                        // range: for (i in a .. b)
+                        self.compile_expr(left);
+                        self.bytecode.instructions.push(Instruction::Store(var.clone()));
+                        let cond_pos = self.bytecode.instructions.len();
+                        self.bytecode.instructions.push(Instruction::Load(var.clone()));
+                        self.compile_expr(right);
+                        self.bytecode.instructions.push(Instruction::Less);
+                        let jump_if_false_pos = self.bytecode.instructions.len();
+                        self.bytecode.instructions.push(Instruction::JumpIfFalse(0));
+                        self.compile_stmts(body);
+                        self.bytecode.instructions.push(Instruction::Load(var.clone()));
+                        self.bytecode.instructions.push(Instruction::Const(1.0));
+                        self.bytecode.instructions.push(Instruction::Add);
+                        self.bytecode.instructions.push(Instruction::Store(var.clone()));
+                        self.bytecode.instructions.push(Instruction::Jump(cond_pos));
+                        let after_body = self.bytecode.instructions.len();
+                        self.bytecode.instructions[jump_if_false_pos] = Instruction::JumpIfFalse(after_body);
+                        return;
+                    }
+                }
+                // normal iterable
                 self.bytecode.instructions.push(Instruction::Const(0.0));
                 self.bytecode.instructions.push(Instruction::Store(var.clone()));
                 let cond_pos = self.bytecode.instructions.len();
@@ -119,7 +149,7 @@ impl Compiler {
     pub fn compile_expr(&mut self, expr: &Expr) {
         match expr {
             Expr::Number(n) => self.bytecode.instructions.push(Instruction::Const(*n)),
-            Expr::Bool(b) => self.bytecode.instructions.push(Instruction::Const(if *b { 1.0 } else { 0.0 })),
+            Expr::Bool(b) => self.bytecode.instructions.push(Instruction::PushBool(*b)),
             Expr::Identifier(name) => self.bytecode.instructions.push(Instruction::Load(name.clone())),
             Expr::BinaryOp { left, op, right } => {
                 self.compile_expr(left);
@@ -129,7 +159,7 @@ impl Compiler {
                     Token::Minus => self.bytecode.instructions.push(Instruction::Sub),
                     Token::Star => self.bytecode.instructions.push(Instruction::Mul),
                     Token::Slash => self.bytecode.instructions.push(Instruction::Div),
-                    Token::Percent => self.bytecode.instructions.push(Instruction::Div), // TODO: implement true modulo
+                    Token::Percent => self.bytecode.instructions.push(Instruction::Modulo),
                     Token::EqEq => self.bytecode.instructions.push(Instruction::EqEq),
                     Token::NotEq => self.bytecode.instructions.push(Instruction::NotEq),
                     Token::Less => self.bytecode.instructions.push(Instruction::Less),
@@ -155,7 +185,7 @@ impl Compiler {
                     self.compile_expr(arg);
                 }
                 if let Expr::Identifier(name) = &**callee {
-                    self.bytecode.instructions.push(Instruction::Call(name.clone()));
+                    self.bytecode.instructions.push(Instruction::CallFunc(name.clone()));
                 }
             }
             Expr::StringLit(s) => self.bytecode.instructions.push(Instruction::PushString(s.clone())),
