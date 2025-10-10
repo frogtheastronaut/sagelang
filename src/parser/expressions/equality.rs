@@ -9,7 +9,7 @@ impl<'a> Parser<'a> {
     pub fn equality(&mut self) -> Expr {
         let mut node = self.comparison();
 
-        while matches!(self.current, Token::EqEq | Token::NotEq) {
+        while matches!(self.current, Token::EqEq | Token::NotEq | Token::And) {
             let op = self.current.clone();
             self.advance();
             let right = self.comparison();

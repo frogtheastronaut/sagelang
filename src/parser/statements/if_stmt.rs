@@ -13,6 +13,14 @@ impl<'a> Parser<'a> {
 
         let then_branch = self.block_stmt();
 
+        let mut elseif_branches = Vec::new();
+        while self.current == Token::ElseIfKw {
+            self.advance();
+            let elseif_cond = self.expr();
+            let elseif_block = self.block_stmt();
+            elseif_branches.push((elseif_cond, elseif_block));
+        }
+
         let else_branch = if self.current == Token::Else {
             self.advance();
             Some(self.block_stmt())
@@ -24,6 +32,7 @@ impl<'a> Parser<'a> {
             condition,
             then_branch,
             else_branch,
+            elseif_branches,
         }
     }
 }

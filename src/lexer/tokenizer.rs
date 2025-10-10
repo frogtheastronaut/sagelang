@@ -55,8 +55,10 @@ impl<'a> Tokenizer<'a> {
         // check if it's a keyword
         if let Some(keyword_token) = self.keywords.get(id.as_str()) {
             keyword_token.clone()
+        } else if let Some(op_token) = self.multi_ops.get(id.as_str()) {
+            op_token.clone()
         } else {
-			// it's a regular identifier
+            // it's a regular identifier
             Token::Identifier(id)
         }
     }

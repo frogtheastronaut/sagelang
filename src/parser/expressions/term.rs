@@ -9,7 +9,7 @@ impl<'a> Parser<'a> {
     pub fn term(&mut self) -> Expr {
         let mut node = self.factor();
 
-        while matches!(self.current, Token::Plus | Token::Minus) {
+        while matches!(self.current, Token::Plus | Token::Minus | Token::DotDot) {
             let op = self.current.clone();
             self.advance();
             let right = self.factor();

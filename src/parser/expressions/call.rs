@@ -53,6 +53,9 @@ impl<'a> Parser<'a> {
                 self.eat(Token::RBracket);
                 Expr::List(items)
             }
+            Token::ElseIfKw | Token::If | Token::Let | Token::Fn | Token::Return | Token::WhileKw | Token::ForKw | Token::PrintKw | Token::Else => {
+                panic!("Unexpected statement keyword in expression: {:?}", self.current)
+            }
             _ => panic!("Unexpected token in call: {:?}", self.current),
         };
 

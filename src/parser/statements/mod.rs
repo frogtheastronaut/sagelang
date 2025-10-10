@@ -5,6 +5,8 @@ pub mod return_stmt;
 pub mod block_stmt;
 pub mod while_stmt;
 pub mod for_stmt;
+pub mod print_stmt;
+pub mod elseif_stmt;
 
 use crate::parser::Parser;
 use crate::parser::ast::Stmt;
@@ -20,6 +22,7 @@ impl<'a> Parser<'a> {
             Token::OpenBrace => Stmt::Block(self.block_stmt()),
             Token::WhileKw => self.while_stmt(),
             Token::ForKw => self.for_stmt(),
+            Token::PrintKw => self.print_stmt(),
             Token::Identifier(_) => {
                 // assignment: identifier = expr;
                 let name = match &self.current {

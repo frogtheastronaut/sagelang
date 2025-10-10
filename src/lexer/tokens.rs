@@ -13,6 +13,7 @@ pub enum Token {
     Plus,
     Minus,
     Star,
+    Percent, // %, modulo operator
     Slash,
     EqEq,        // ==
     NotEq,       // !=
@@ -21,15 +22,15 @@ pub enum Token {
     Greater,     // >
     GreaterEq,   // >=
     Semicolon,   // ;
-	OpenBrace,   // {
-	CloseBrace,  // }
+    OpenBrace,   // {
+    CloseBrace,  // }
 
     // symbols
     LParen,
     RParen,
     Colon,
     Quote,
-	Assign, // =
+    Assign, // =
     LBracket, // [
     RBracket, // ]
 
@@ -38,6 +39,7 @@ pub enum Token {
     Fn,
     If,
     Else,
+    ElseIfKw,
     Return,
     NumKw,    // num keyword
     BoolKw,   // bool keyword
@@ -46,10 +48,13 @@ pub enum Token {
     WhileKw,  // while keyword
     ForKw,    // for keyword
     InKw,     // in keyword
+    PrintKw,
+    And,
 
-	// other
-	Comma, // ,
-	Dot,   // .
+    // other
+    Comma, // ,
+    Dot,   // .
+    DotDot, // ..
 
     // EOF
     EOF,
@@ -61,21 +66,22 @@ pub fn default_symbol_map() -> HashMap<char, Token> {
     map.insert('+', Token::Plus);
     map.insert('-', Token::Minus);
     map.insert('*', Token::Star);
+    map.insert('%', Token::Percent);
     map.insert('/', Token::Slash);
     map.insert('(', Token::LParen);
     map.insert(')', Token::RParen);
     map.insert(':', Token::Colon);
     map.insert('\'', Token::Quote);
-	map.insert('=', Token::Assign);
-	map.insert('<', Token::Less);
-	map.insert('>', Token::Greater);
-	map.insert(';', Token::Semicolon);
-	map.insert('{', Token::OpenBrace);
-	map.insert('}', Token::CloseBrace);
+    map.insert('=', Token::Assign);
+    map.insert('<', Token::Less);
+    map.insert('>', Token::Greater);
+    map.insert(';', Token::Semicolon);
+    map.insert('{', Token::OpenBrace);
+    map.insert('}', Token::CloseBrace);
     map.insert('[', Token::LBracket);
     map.insert(']', Token::RBracket);
-	map.insert(',', Token::Comma);
-	map.insert('.', Token::Dot);
+    map.insert(',', Token::Comma);
+    map.insert('.', Token::Dot);
     map
 }
 
@@ -86,6 +92,8 @@ pub fn multi_char_ops() -> HashMap<&'static str, Token> {
     map.insert("!=", Token::NotEq);
     map.insert(">=", Token::GreaterEq);
     map.insert("<=", Token::LessEq);
+    map.insert("..", Token::DotDot);
+    map.insert("and", Token::And);
     map
 }
 
@@ -96,6 +104,7 @@ pub fn keywords() -> HashMap<&'static str, Token> {
     map.insert("function", Token::Fn);
     map.insert("if", Token::If);
     map.insert("else", Token::Else);
+    map.insert("elseif", Token::ElseIfKw);
     map.insert("return", Token::Return);
     map.insert("num", Token::NumKw);
     map.insert("bool", Token::BoolKw);
@@ -104,6 +113,7 @@ pub fn keywords() -> HashMap<&'static str, Token> {
     map.insert("while", Token::WhileKw);
     map.insert("for", Token::ForKw);
     map.insert("in", Token::InKw);
+    map.insert("print", Token::PrintKw);
     map.insert("true", Token::Bool(true));
     map.insert("false", Token::Bool(false));
     map
