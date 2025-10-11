@@ -25,6 +25,9 @@ fn main() {
     let mut parser = parser::Parser::new(&mut tokenizer);
 
     let ast = parser.parse();
+    // write AST to ast.txt
+    let ast_str = format!("{:?}", ast);
+    fs::write("ast.txt", ast_str).expect("Failed to write AST");
     let mut compiler = compiler::Compiler { bytecode: compiler::Bytecode { instructions: vec![] } };
     compiler.compile_stmts(&ast);
 
@@ -34,6 +37,4 @@ fn main() {
         .collect::<Vec<_>>()
         .join("\n");
     fs::write("bytecode.txt", bytecode_str).expect("Failed to write bytecode");
-
-    // VM logic removed. Only output bytecode to bytecode.txt
 }

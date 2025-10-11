@@ -38,6 +38,19 @@ impl<'a> Tokenizer<'a> {
 
         Token::Number(num_str.parse::<f64>().unwrap())
     }
+    // skip comments
+    fn skip_comment(&mut self) {
+        // advance past both slashes
+        self.lexer.advance();
+        self.lexer.advance();
+        // skip until end of line or EOF
+        while let Some(c) = self.lexer.current_char() {
+            if c == '\n' {
+                break;
+            }
+            self.lexer.advance();
+        }
+    }
 
 	// parse identifiers and keywords
     fn identifier(&mut self) -> Token {
@@ -80,6 +93,15 @@ impl<'a> Tokenizer<'a> {
     pub fn next_token(&mut self) -> CurrentToken {
         self.lexer.skip_whitespace();
         let line = self.lexer.line;
+
+        // handle comments
+        if let Some('/') = self.lexer.current_char() {
+            if let Some('/') = self.lexer.peek_char() {
+                self.skip_comment();
+                return self.next_token(); // get the next token
+            }
+        }
+
         if let Some(tok) = self.multi_char_op() {
             return CurrentToken { token: tok, line };
         }

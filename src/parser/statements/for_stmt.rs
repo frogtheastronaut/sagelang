@@ -14,7 +14,7 @@ impl<'a> Parser<'a> {
         self.eat(Token::ForKw);
         // eat (
         self.eat(Token::LParen);
-        // this is the variable (i from example above)
+        // this is the variable
         let var = match &self.current.token {
             Token::Identifier(id) => id.clone(),
             _ => panic!("Expected variable name in for loop at line {}", self.current.line),
