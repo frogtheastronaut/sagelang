@@ -1,5 +1,5 @@
 use crate::parser::ast::{Stmt, Param};
-use crate::compiler::instruction::Instruction;
+use crate::compiler::instruction::{Instruction, Bytecode};
 use crate::compiler::Compiler;
 
 pub fn function_stmt(
@@ -8,7 +8,7 @@ pub fn function_stmt(
     params: &Vec<Param>,
     body: &Vec<Stmt>
 ) {
-    let mut func_compiler = Compiler { bytecode: crate::compiler::instruction::Bytecode { instructions: vec![] } };
+    let mut func_compiler = Compiler { bytecode: Bytecode { instructions: vec![] } };
     func_compiler.compile_stmts(body);
     let param_names = params.iter().map(|p| p.param_name.clone()).collect();
     compiler.bytecode.instructions.push(Instruction::DefFunc {
