@@ -1,6 +1,6 @@
 mod lexer;
 mod parser;
-mod compiler;
+mod interpreter;
 
 use std::fs;
 use std::env;
@@ -28,13 +28,8 @@ fn main() {
     // write AST to ast.txt
     let ast_str = format!("{:?}", ast);
     fs::write("ast.txt", ast_str).expect("Failed to write AST");
-    let mut compiler = compiler::Compiler { bytecode: compiler::Bytecode { instructions: vec![] } };
-    compiler.compile_stmts(&ast);
 
-    // write bytecode to bytecode.txt
-    let bytecode_str = compiler.bytecode.instructions.iter()
-        .map(|instr| compiler::format_instruction(instr))
-        .collect::<Vec<_>>()
-        .join("\n");
-    fs::write("bytecode.txt", bytecode_str).expect("Failed to write bytecode");
+    // run interpreter
+    let mut interpreter = interpreter::Interpreter::new();
+    interpreter.interpret(&ast);
 }
