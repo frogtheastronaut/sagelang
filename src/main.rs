@@ -1,19 +1,21 @@
 mod lexer;
 mod parser;
 mod interpreter;
+mod compiler;
+mod vm;
 
 use std::fs;
 use std::env;
 
 fn main() {
     // get command line args
-    // we're assuming its first argument
     let args: Vec<String> = env::args().collect();
     if args.len() < 2 {
-        eprintln!("Usage: {} <filename>", args[0]);
+        eprintln!("Usage: {} <filename> [--debug]", args[0]);
         return;
     }
     let filename = &args[1];
+    let debug = args.len() > 2 && args[2] == "--debug";
 
     // read the file into a string
     let contents = fs::read_to_string(filename)
@@ -25,11 +27,26 @@ fn main() {
     let mut parser = parser::Parser::new(&mut tokenizer);
 
     let ast = parser.parse();
-    // write AST to ast.txt
+    
+    // write AST to ast.txt for debugging
     let ast_str = format!("{:?}", ast);
     fs::write("ast.txt", ast_str).expect("Failed to write AST");
 
-    // run interpreter
-    let mut interpreter = interpreter::Interpreter::new();
-    interpreter.interpret(&ast);
+    // compile to bytecode
+    let mut compiler = compiler::Compiler::new();
+    let chunk = match compiler.compile(&ast) {
+        Ok(chunk) => chunk,
+        Err(e) => {
+            eprintln!("Compilation error: {}", e);
+            return;
+        }
+    };
+
+    // run in VM
+    let mut vm = vm::VM::new();
+    vm.debug = debug;
+    
+    if let Err(e) = vm.run(chunk) {
+        eprintln!("Runtime error: {}", e);
+    }
 }

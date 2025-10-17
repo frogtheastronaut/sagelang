@@ -1,6 +1,3 @@
-use crate::parser::ast::{Param, Stmt};
-use super::env::Env;
-
 #[derive(Debug, Clone)]
 pub enum Value {
     Number(f64),
@@ -8,10 +5,10 @@ pub enum Value {
     String(String),
     List(Vec<Value>),
     Function {
-        params: Vec<Param>,
-        body: Vec<Stmt>,
-        env: Env,
+        #[allow(dead_code)]
+        name: String,
+        param_count: usize,
+        chunk: crate::vm::Chunk,
     },
-    Return(Box<Value>),
     Null,
 }
