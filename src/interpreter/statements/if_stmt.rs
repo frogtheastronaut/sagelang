@@ -3,15 +3,37 @@ use crate::interpreter::{Env, Value};
 
 pub fn eval_if_stmt(env: &mut Env, condition: &Expr, then_branch: &[Stmt], else_branch: &Option<Vec<Stmt>>, elseif_branches: &[(Expr, Vec<Stmt>)]) -> Value {
     if is_truthy(super::super::expressions::eval_expr(env, condition)) {
-        super::super::statements::block::eval_block(env, then_branch)
+        // Evaluate then branch directly in current environment
+        let mut last = Value::Null;
+        for stmt in then_branch {
+            last = super::eval_stmt(env, stmt).unwrap_or(Value::Null);
+            if let Value::Return(_) = last {
+                return last;
+            }
+        }
+        last
     } else {
         for (cond, block) in elseif_branches {
             if is_truthy(super::super::expressions::eval_expr(env, cond)) {
-                return super::super::statements::block::eval_block(env, block);
+                let mut last = Value::Null;
+                for stmt in block {
+                    last = super::eval_stmt(env, stmt).unwrap_or(Value::Null);
+                    if let Value::Return(_) = last {
+                        return last;
+                    }
+                }
+                return last;
             }
         }
         if let Some(else_block) = else_branch {
-            super::super::statements::block::eval_block(env, else_block)
+            let mut last = Value::Null;
+            for stmt in else_block {
+                last = super::eval_stmt(env, stmt).unwrap_or(Value::Null);
+                if let Value::Return(_) = last {
+                    return last;
+                }
+            }
+            last
         } else {
             Value::Null
         }

@@ -7,8 +7,10 @@ pub fn eval_call(env: &mut Env, callee: &Expr, args: &[Expr]) -> Value {
         Expr::Identifier(name) => {
             let func_val = env.get(name);
             match func_val {
-                Some(Value::Function { params, body, env: func_env }) => {
-                    let mut call_env = Env::with_parent(func_env.clone());
+                Some(Value::Function { params, body, env: _func_env }) => {
+                    // Use the current environment (where the function is visible)
+                    // instead of the captured environment to allow recursion
+                    let mut call_env = Env::with_parent(env.clone());
                     for (i, param) in params.iter().enumerate() {
                         let arg_val = args.get(i).map(|e| super::eval_expr(env, e)).unwrap_or(Value::Null);
                         call_env.set(param.param_name.clone(), arg_val.clone());
@@ -23,7 +25,7 @@ pub fn eval_call(env: &mut Env, callee: &Expr, args: &[Expr]) -> Value {
                     }
                     Value::Null
                 }
-                _ => Value::Null,
+                _ => Value::Null
             }
         }
         _ => Value::Null,

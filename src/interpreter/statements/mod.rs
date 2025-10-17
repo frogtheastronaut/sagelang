@@ -19,13 +19,11 @@ pub fn eval_stmt(env: &mut Env, stmt: &Stmt) -> Option<Value> {
         Stmt::Print(expr) => print::eval_print(env, expr),
         Stmt::ExprStmt(expr) => expr_stmt::eval_expr_stmt(env, expr),
         Stmt::Block(stmts) => {
-            for s in stmts {
-                let val = eval_stmt(env, s);
-                if let Some(Value::Return(_)) = val {
-                    return val;
-                }
+            let val = block::eval_block(env, stmts);
+            if let Value::Return(_) = val {
+                return Some(val);
             }
-            Value::Null
+            val
         },
         Stmt::If { condition, then_branch, else_branch, elseif_branches } => {
             let val = if_stmt::eval_if_stmt(env, condition, then_branch, else_branch, elseif_branches);

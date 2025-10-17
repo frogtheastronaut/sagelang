@@ -23,4 +23,15 @@ impl Env {
     pub fn set(&mut self, name: String, value: Value) {
         self.values.insert(name, value);
     }
+    
+    pub fn update(&mut self, name: &str, value: Value) -> bool {
+        if self.values.contains_key(name) {
+            self.values.insert(name.to_string(), value);
+            true
+        } else if let Some(parent) = &mut self.parent {
+            parent.update(name, value)
+        } else {
+            false
+        }
+    }
 }
