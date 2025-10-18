@@ -1,0 +1,30 @@
+// Test private methods - should only be callable from within class
+
+class Calculator {
+    public value;
+    
+    function constructor(number v) {
+        this.value = v;
+    }
+    
+    private function validateNumber(number n) {
+        return n > 0;
+    }
+    
+    public function add(number n) {
+        let valid = this.validateNumber(n);
+        if (valid) {
+            this.value = this.value + n;
+            print "Added " + n + ", new value: " + this.value;
+        } else {
+            print "Cannot add negative numbers!";
+        }
+    }
+}
+
+let calc = Calculator(10);
+calc.add(5);
+
+print "Trying to call private method from outside...";
+// This should fail because validateNumber is private
+calc.validateNumber(3);

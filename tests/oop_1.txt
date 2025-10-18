@@ -1,0 +1,8 @@
+class Test {
+    function constructor(string n) {
+        print "Constructor called";
+        print n;
+    }
+}
+
+let t = Test("hello");

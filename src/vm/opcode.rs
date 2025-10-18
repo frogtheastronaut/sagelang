@@ -44,6 +44,14 @@ pub enum OpCode {
     BuildRange,             // build range from two numbers on stack
     GetIndex,               // get item from list by index
     
+    // Object-Oriented Programming
+    DefineClass(usize),     // Define a class with name index
+    GetProperty(usize),     // Get property from object (name index)
+    SetProperty(usize),     // Set property on object (name index)
+    GetSuper(usize),        // Get method from superclass (name index)
+    Invoke(usize, usize),   // Invoke method (name index, arg count)
+    Inherit,                // Set up inheritance
+    
     // Other
     Pop,                    // Pop and discard top of stack
     Print,                  // Print top of stack

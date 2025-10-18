@@ -59,6 +59,13 @@ pub enum Token {
     PrintKw,
     And,
     Or,
+    ClassKw,  // class keyword
+    ThisKw,   // this keyword
+    SuperKw,  // super keyword
+    StaticKw, // static keyword
+    PrivateKw, // private keyword
+    PublicKw,  // public keyword
+    ProtectedKw, // protected keyword
 
     // other
     Comma, // ,
@@ -126,5 +133,12 @@ pub fn keywords() -> HashMap<&'static str, Token> {
     map.insert("print", Token::PrintKw);
     map.insert("true", Token::Bool(true));
     map.insert("false", Token::Bool(false));
+    map.insert("class", Token::ClassKw);
+    map.insert("this", Token::ThisKw);
+    map.insert("super", Token::SuperKw);
+    map.insert("static", Token::StaticKw);
+    map.insert("private", Token::PrivateKw);
+    map.insert("public", Token::PublicKw);
+    map.insert("protected", Token::ProtectedKw);
     map
 }

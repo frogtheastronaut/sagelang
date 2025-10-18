@@ -158,6 +158,30 @@ impl Chunk {
                 println!("GetIndex");
                 offset + 1
             }
+            OpCode::DefineClass(name_idx) => {
+                println!("DefineClass {}", name_idx);
+                offset + 1
+            }
+            OpCode::GetProperty(name_idx) => {
+                println!("GetProperty {}", name_idx);
+                offset + 1
+            }
+            OpCode::SetProperty(name_idx) => {
+                println!("SetProperty {}", name_idx);
+                offset + 1
+            }
+            OpCode::GetSuper(method_idx) => {
+                println!("GetSuper {}", method_idx);
+                offset + 1
+            }
+            OpCode::Invoke(name_idx, arg_count) => {
+                println!("Invoke {} ({})", name_idx, arg_count);
+                offset + 1
+            }
+            OpCode::Inherit => {
+                println!("Inherit");
+                offset + 1
+            }
             OpCode::Pop => {
                 println!("Pop");
                 offset + 1

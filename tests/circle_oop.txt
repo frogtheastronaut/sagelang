@@ -1,0 +1,16 @@
+class Circle {
+    function constructor(number r) {
+        this.radius = r;
+    }
+    
+    function area() {
+        let result = 3.14159 * this.radius * this.radius;
+        return result;
+    }
+}
+
+let c = Circle(7);
+print "Radius:";
+print c.radius;
+print "Area:";
+print c.area();

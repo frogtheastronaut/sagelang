@@ -6,6 +6,7 @@ pub mod block_stmt;
 pub mod while_stmt;
 pub mod for_stmt;
 pub mod print_stmt;
+pub mod class_stmt;
 
 use crate::parser::Parser;
 use crate::parser::ast::Stmt;
@@ -22,18 +23,47 @@ impl<'a> Parser<'a> {
             Token::WhileKw => self.while_stmt(),
             Token::ForKw => self.for_stmt(),
             Token::PrintKw => self.print_stmt(),
-            Token::Identifier(_) => {
-                let name = match &self.current.token {
-                    Token::Identifier(id) => id.clone(),
-                    _ => unreachable!(),
-                };
+            Token::ClassKw => {
                 self.advance();
-                self.eat(Token::Assign);
-                let value = self.expr();
-                self.eat(Token::Semicolon);
-                Stmt::Assign { name, value }
+                self.class_declaration()
             }
-            _ => Stmt::ExprStmt(self.expr()),
+            Token::Identifier(_) | Token::ThisKw => {
+                // Parse the left side as an expression
+                let expr = self.call();
+                
+                // Check if it's followed by assignment
+                if matches!(self.current.token, Token::Assign) {
+                    self.advance(); // consume '='
+                    let value = self.expr();
+                    self.eat(Token::Semicolon);
+                    
+                    // Check if it's property assignment or variable assignment
+                    match expr {
+                        crate::parser::ast::Expr::Get { object, name } => {
+                            // Convert Get to Set
+                            Stmt::ExprStmt(crate::parser::ast::Expr::Set {
+                                object,
+                                name,
+                                value: Box::new(value),
+                            })
+                        }
+                        crate::parser::ast::Expr::Identifier(name) => {
+                            // Simple variable assignment
+                            Stmt::Assign { name, value }
+                        }
+                        _ => panic!("Invalid assignment target"),
+                    }
+                } else {
+                    // It's just an expression statement
+                    self.eat(Token::Semicolon);
+                    Stmt::ExprStmt(expr)
+                }
+            }
+            _ => {
+                let expr = self.expr();
+                self.eat(Token::Semicolon);
+                Stmt::ExprStmt(expr)
+            }
         }
     }
 }

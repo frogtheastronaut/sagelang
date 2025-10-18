@@ -1,5 +1,13 @@
 use crate::lexer::tokens::Token;
 
+#[derive(Debug, Clone, PartialEq)]
+#[allow(dead_code)]
+pub enum AccessModifier {
+    Public,
+    Private,
+    Protected,
+}
+
 #[derive(Debug, Clone)]
 #[allow(dead_code)]
 pub struct Param {
@@ -34,6 +42,19 @@ pub enum Expr {
     Call {
         callee: Box<Expr>,
         args: Vec<Expr>,
+    },
+    Get {
+        object: Box<Expr>,
+        name: String,
+    },
+    Set {
+        object: Box<Expr>,
+        name: String,
+        value: Box<Expr>,
+    },
+    This,
+    Super {
+        method: String,
     },
 }
 
@@ -72,4 +93,27 @@ pub enum Stmt {
     Return(Option<Expr>),
     ExprStmt(Expr),
     Block(Vec<Stmt>),
+    Class {
+        name: String,
+        superclass: Option<String>,
+        fields: Vec<Field>,
+        methods: Vec<Method>,
+    },
+}
+
+#[derive(Debug, Clone)]
+#[allow(dead_code)]
+pub struct Method {
+    pub name: String,
+    pub params: Vec<Param>,
+    pub body: Vec<Stmt>,
+    pub is_static: bool,
+    pub access: AccessModifier,
+}
+
+#[derive(Debug, Clone)]
+#[allow(dead_code)]
+pub struct Field {
+    pub name: String,
+    pub access: AccessModifier,
 }

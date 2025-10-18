@@ -44,6 +44,7 @@ impl Compiler {
             Stmt::For { var, iterable, body } => self.compile_for_stmt(var, iterable, body),
             Stmt::Function { name, params, body } => self.compile_function_stmt(name, params, body),
             Stmt::Return(expr) => self.compile_return_stmt(expr),
+            Stmt::Class { name, superclass, fields, methods } => self.compile_class_stmt(name, superclass, fields, methods),
         }
     }
     
@@ -58,6 +59,10 @@ impl Compiler {
             Expr::BinaryOp { left, op, right } => self.compile_binary_op(left, op, right),
             Expr::Grouping(expr) => self.compile_grouping(expr),
             Expr::Call { callee, args } => self.compile_call(callee, args),
+            Expr::Get { object, name } => self.compile_get(object, name),
+            Expr::Set { object, name, value } => self.compile_set(object, name, value),
+            Expr::This => self.compile_this(),
+            Expr::Super { method } => self.compile_super(method),
         }
     }
     

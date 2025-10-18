@@ -1,0 +1,81 @@
+// Comprehensive OOP Example for SageLang
+
+// Base class demonstrating encapsulation
+class Shape {
+    function constructor(string name) {
+        this.name = name;
+        this.x = 0;
+        this.y = 0;
+    }
+    
+    function move(number dx, number dy) {
+        this.x = this.x + dx;
+        this.y = this.y + dy;
+        print this.name + " moved to (" + this.x + ", " + this.y + ")";
+    }
+    
+    function area() {
+        print "Shape.area() not implemented";
+        return 0;
+    }
+}
+
+// Inheritance: Rectangle inherits from Shape
+class Rectangle < Shape {
+    function constructor(string name, number w, number h) {
+        this.name = name;
+        this.x = 0;
+        this.y = 0;
+        this.width = w;
+        this.height = h;
+    }
+    
+    // Polymorphism: Override area() method
+    function area() {
+        let result = this.width * this.height;
+        return result;
+    }
+    
+    function describe() {
+        print this.name + ": " + this.width + "x" + this.height + " rectangle";
+    }
+}
+
+// Another subclass demonstrating polymorphism
+class Circle < Shape {
+    function constructor(string name, number r) {
+        this.name = name;
+        this.x = 0;
+        this.y = 0;
+        this.radius = r;
+    }
+    
+    // Polymorphism: Different implementation of area()
+    function area() {
+        let result = 3.14159 * this.radius * this.radius;
+        return result;
+    }
+}
+
+print "=== Creating objects ===";
+let rect = Rectangle("MyRect", 10, 5);
+let circ = Circle("MyCircle", 7);
+
+print "";
+print "=== Encapsulation: Accessing properties ===";
+print "Rectangle name: " + rect.name;
+print "Circle radius: " + circ.radius;
+
+print "";
+print "=== Calling methods ===";
+rect.describe();
+
+print "";
+print "=== Polymorphism: Same method, different behavior ===";
+print "Rectangle area: " + rect.area();
+print "Circle area: " + circ.area();
+
+print "";
+print "=== Inheritance: Using inherited method ===";
+rect.move(10, 20);
+circ.move(5, 15);

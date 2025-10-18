@@ -8,6 +8,21 @@ use crate::lexer::tokens::Token;
 impl<'a> Parser<'a> {
     pub fn call(&mut self) -> Expr {
         let mut expr = match &self.current.token {
+            Token::ThisKw => {
+                self.advance();
+                Expr::This
+            }
+            Token::SuperKw => {
+                self.advance();
+                self.eat(Token::Dot);
+                if let Token::Identifier(method) = &self.current.token {
+                    let method_name = method.clone();
+                    self.advance();
+                    Expr::Super { method: method_name }
+                } else {
+                    panic!("Expected method name after 'super.'");
+                }
+            }
             Token::Identifier(name) => {
                 let id = name.clone();
                 self.advance();
@@ -59,21 +74,39 @@ impl<'a> Parser<'a> {
             _ => panic!("[ERR] Unexpected token in call: {:?} at line {}", self.current.token, self.current.line),
         };
 
-        while self.current.token == Token::LParen {
-            self.advance();
-            let mut args = Vec::new();
-            if self.current.token != Token::RParen {
-                args.push(self.expr());
-                while self.current.token == Token::Comma {
+        loop {
+            match &self.current.token {
+                Token::LParen => {
                     self.advance();
-                    args.push(self.expr());
+                    let mut args = Vec::new();
+                    if self.current.token != Token::RParen {
+                        args.push(self.expr());
+                        while self.current.token == Token::Comma {
+                            self.advance();
+                            args.push(self.expr());
+                        }
+                    }
+                    self.eat(Token::RParen);
+                    expr = Expr::Call {
+                        callee: Box::new(expr),
+                        args,
+                    };
                 }
+                Token::Dot => {
+                    self.advance();
+                    if let Token::Identifier(name) = &self.current.token {
+                        let prop_name = name.clone();
+                        self.advance();
+                        expr = Expr::Get {
+                            object: Box::new(expr),
+                            name: prop_name,
+                        };
+                    } else {
+                        panic!("Expected property name after '.'");
+                    }
+                }
+                _ => break,
             }
-            self.eat(Token::RParen);
-            expr = Expr::Call {
-                callee: Box::new(expr),
-                args,
-            };
         }
 
         expr
