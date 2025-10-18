@@ -1,5 +1,5 @@
 /*
- * Parser for function calls
+ * parser for function calls
  */
 use crate::parser::Parser;
 use crate::parser::ast::Expr;
@@ -30,13 +30,13 @@ impl<'a> Parser<'a> {
                 Expr::Bool(val)
             }
             Token::List(items) => {
-                // Convert Vec<Token> to Vec<Expr>
+                // convert Vec<Token> to Vec<Expr>
                 let expr_items = items.iter().map(|tok| match tok {
                     Token::Number(n) => Expr::Number(*n),
                     Token::StringLit(s) => Expr::StringLit(s.clone()),
                     Token::Bool(b) => Expr::Bool(*b),
                     Token::Identifier(id) => Expr::Identifier(id.clone()),
-                    _ => panic!("Unsupported list element: {:?}", tok),
+                    _ => panic!("[ERR] Unsupported list element: {:?}", tok),
                 }).collect();
                 self.advance();
                 Expr::List(expr_items)
@@ -54,9 +54,9 @@ impl<'a> Parser<'a> {
                 Expr::List(items)
             }
             Token::ElseIfKw | Token::If | Token::Let | Token::Fn | Token::Return | Token::WhileKw | Token::ForKw | Token::PrintKw | Token::Else => {
-                panic!("Unexpected statement keyword in expression: {:?} at line {}", self.current.token, self.current.line)
+                panic!("[ERR] Unexpected statement keyword in expression: {:?} at line {}", self.current.token, self.current.line)
             }
-            _ => panic!("Unexpected token in call: {:?} at line {}", self.current.token, self.current.line),
+            _ => panic!("[ERR] Unexpected token in call: {:?} at line {}", self.current.token, self.current.line),
         };
 
         while self.current.token == Token::LParen {

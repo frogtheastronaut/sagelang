@@ -28,16 +28,19 @@ fn main() {
 
     let ast = parser.parse();
     
-    // write AST to ast.txt for debugging
-    let ast_str = format!("{:?}", ast);
-    fs::write("ast.txt", ast_str).expect("Failed to write AST");
+    if debug {
+        // write AST to ast.txt for debugging
+        let ast_str = format!("{:?}", ast);
+        fs::write("ast.txt", ast_str).expect("[ERR] Failed to write AST");
+        print!("[SAGE] Wrote AST")
+    }
 
     // compile to bytecode
     let mut compiler = compiler::Compiler::new();
     let chunk = match compiler.compile(&ast) {
         Ok(chunk) => chunk,
         Err(e) => {
-            eprintln!("Compilation error: {}", e);
+            eprintln!("[ERR] Compilation error: {}", e);
             return;
         }
     };
@@ -47,6 +50,6 @@ fn main() {
     vm.debug = debug;
     
     if let Err(e) = vm.run(chunk) {
-        eprintln!("Runtime error: {}", e);
+        eprintln!("[ERR] Runtime error: {}", e);
     }
 }

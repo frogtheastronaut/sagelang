@@ -1,19 +1,19 @@
-/// Bytecode instructions for the SageLang VM
+// bytecode instructions
 #[derive(Debug, Clone, PartialEq)]
 pub enum OpCode {
-    // Literal values
-    LoadConst(usize),       // Load constant from constant pool
-    LoadTrue,               // Load boolean true
-    LoadFalse,              // Load boolean false
-    LoadNull,               // Load null value
+    // variables
+    LoadConst(usize),       // load constant from constant pool
+    LoadTrue,               // load boolean true
+    LoadFalse,              // load boolean false
+    LoadNull,               // load null value
     
-    // Variables
-    GetGlobal(usize),       // Get global variable by name index
-    SetGlobal(usize),       // Set global variable by name index
-    GetLocal(usize),        // Get local variable by stack index
-    SetLocal(usize),        // Set local variable by stack index
+    // variables
+    GetGlobal(usize),       // get global variable by name index
+    SetGlobal(usize),       // set global variable by name index
+    GetLocal(usize),        // get local variable by stack index
+    SetLocal(usize),        // set local variable by stack index
     
-    // Arithmetic operations
+    // arithmetic
     Add,
     Subtract,
     Multiply,
@@ -21,7 +21,7 @@ pub enum OpCode {
     Modulo,
     Negate,
     
-    // Comparison operations
+    // comparison ops
     Equal,
     NotEqual,
     Greater,
@@ -29,20 +29,20 @@ pub enum OpCode {
     Less,
     LessEqual,
     
-    // Control flow
-    Jump(usize),            // Unconditional jump to instruction
-    JumpIfFalse(usize),     // Jump if top of stack is falsy
-    JumpIfTrue(usize),      // Jump if top of stack is truthy
-    Loop(usize),            // Jump backwards (for loops)
+    // flow control
+    Jump(usize),            // unconditional jump to instruction
+    JumpIfFalse(usize),     // jump if top of stack is falsy
+    JumpIfTrue(usize),      // jump if top of stack is truthy
+    Loop(usize),            // jump backwards (for loops)
     
-    // Functions
-    Call(usize),            // Call function with N arguments
-    Return,                 // Return from function
+    // functions
+    Call(usize),            // call function
+    Return,                 // return from function
     
-    // Collections
-    MakeList(usize),        // Create list from N stack items
-    BuildRange,             // Build range from two numbers on stack
-    GetIndex,               // Get item from list by index
+    // collections
+    MakeList(usize),        // create list from N stack items
+    BuildRange,             // build range from two numbers on stack
+    GetIndex,               // get item from list by index
     
     // Other
     Pop,                    // Pop and discard top of stack

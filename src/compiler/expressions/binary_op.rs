@@ -5,7 +5,7 @@ use crate::parser::ast::Expr;
 
 impl Compiler {
     pub fn compile_binary_op(&mut self, left: &Expr, op: &Token, right: &Expr) -> Result<(), String> {
-        // Handle short-circuit operators
+        // handle and/or
         match op {
             Token::And => {
                 self.compile_expr(left)?;
@@ -28,7 +28,7 @@ impl Compiler {
             _ => {}
         }
         
-        // Regular binary operators
+        // regular binary ops
         self.compile_expr(left)?;
         self.compile_expr(right)?;
         

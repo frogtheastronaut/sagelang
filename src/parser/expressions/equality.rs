@@ -1,5 +1,5 @@
 /*
- * Parser for == and != expressions
+ * parser for equality expressions
  */
 use crate::parser::Parser;
 use crate::parser::ast::Expr;

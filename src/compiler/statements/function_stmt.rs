@@ -5,26 +5,26 @@ use crate::parser::ast::{Param, Stmt};
 
 impl Compiler {
     pub fn compile_function_stmt(&mut self, name: &str, params: &[Param], body: &[Stmt]) -> Result<(), String> {
-        // Compile the function body into a separate chunk
+        // compile the function body into a separate chunk
         let mut func_compiler = Compiler::new();
         func_compiler.chunk.name = name.to_string();
         
-        // Set up parameters as local variables
+        // set up parameters as local variables
         for (i, param) in params.iter().enumerate() {
             func_compiler.locals.insert(param.param_name.clone(), i);
             func_compiler.local_count = i + 1;
         }
         
-        // Compile function body
+        // compile function body
         for stmt in body {
             func_compiler.compile_stmt(stmt)?;
         }
         
-        // Ensure function returns something
+        // ensure function returns something
         func_compiler.chunk.write(OpCode::LoadNull);
         func_compiler.chunk.write(OpCode::Return);
         
-        // Create compiled function value
+        // create compiled function value
         let func_value = Value::Function {
             name: name.to_string(),
             param_count: params.len(),
@@ -34,7 +34,7 @@ impl Compiler {
         let const_idx = self.chunk.add_constant(func_value);
         self.chunk.write(OpCode::LoadConst(const_idx));
         
-        // Store function in variable
+        // store function in variable
         if self.scope_depth > 0 {
             let idx = self.local_count;
             self.locals.insert(name.to_string(), idx);

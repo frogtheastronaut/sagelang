@@ -1,7 +1,7 @@
 use crate::interpreter::Value;
 use super::opcode::OpCode;
 
-/// A chunk of bytecode with its associated constant pool
+// a chunk of bytecode with its associated constant pool
 #[derive(Debug, Clone)]
 pub struct Chunk {
     pub code: Vec<OpCode>,
@@ -18,18 +18,18 @@ impl Chunk {
         }
     }
     
-    /// Add an instruction to the chunk
+    // add an instruction to the chunk
     pub fn write(&mut self, op: OpCode) {
         self.code.push(op);
     }
     
-    /// Add a constant to the constant pool and return its index
+    // add a constant to the constant pool and return its index
     pub fn add_constant(&mut self, value: Value) -> usize {
         self.constants.push(value);
         self.constants.len() - 1
     }
     
-    /// Disassemble the chunk for debugging
+    // disassemble the chunk (for debugging)
     pub fn disassemble(&self) {
         println!("== {} ==", self.name);
         let mut offset = 0;

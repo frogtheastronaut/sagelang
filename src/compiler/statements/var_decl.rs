@@ -7,7 +7,7 @@ impl Compiler {
     pub fn compile_var_decl(&mut self, name: &str, value: &Expr) -> Result<(), String> {
         self.compile_expr(value)?;
         
-        // Store in local if we're in a local scope, otherwise global
+        // store in local if we're in a local, otherwise global
         if self.scope_depth > 0 {
             let idx = self.local_count;
             self.locals.insert(name.to_string(), idx);

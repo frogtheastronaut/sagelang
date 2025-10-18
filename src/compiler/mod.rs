@@ -68,7 +68,7 @@ impl Compiler {
     fn end_scope(&mut self) {
         self.scope_depth -= 1;
         
-        // Remove locals that went out of scope
+        // remove locals that went out of scope
         let mut to_remove = Vec::new();
         for (name, &idx) in &self.locals {
             if idx >= self.local_count {

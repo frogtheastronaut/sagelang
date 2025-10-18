@@ -33,7 +33,7 @@ impl<'a> Parser<'a> {
         if std::mem::discriminant(&self.current.token) == std::mem::discriminant(&expected) {
             self.advance();
         } else {
-            panic!("Expected {:?}, got {:?} at line {}", expected, self.current.token, self.current.line);
+            panic!("[ERR] Expected {:?}, got {:?} at line {}", expected, self.current.token, self.current.line);
         }
     }
 }

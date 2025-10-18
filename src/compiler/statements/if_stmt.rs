@@ -10,28 +10,28 @@ impl Compiler {
         else_branch: &Option<Vec<Stmt>>,
         elseif_branches: &[(Expr, Vec<Stmt>)]
     ) -> Result<(), String> {
-        // Compile condition
+        // compile condition
         self.compile_expr(condition)?;
         
-        // Jump to else if condition is false
+        // jump to else if condition is false
         let then_jump = self.emit_jump(OpCode::JumpIfFalse(0));
         self.chunk.write(OpCode::Pop); // Pop condition
         
-        // Compile then branch
+        // compile then branch
         self.begin_scope();
         for stmt in then_branch {
             self.compile_stmt(stmt)?;
         }
         self.end_scope();
         
-        // Jump over else branch
+        // jump over else branch
         let else_jump = self.emit_jump(OpCode::Jump(0));
         
-        // Patch then jump to point here
+        // patch then jump to point here
         self.patch_jump(then_jump);
         self.chunk.write(OpCode::Pop); // Pop condition
         
-        // Handle elseif branches
+        // handle elseif branches
         let mut elseif_jumps = Vec::new();
         for (elseif_cond, elseif_body) in elseif_branches {
             self.compile_expr(elseif_cond)?;
@@ -49,7 +49,7 @@ impl Compiler {
             self.chunk.write(OpCode::Pop);
         }
         
-        // Compile else branch if it exists
+        // compile else branch if it exists
         if let Some(else_stmts) = else_branch {
             self.begin_scope();
             for stmt in else_stmts {
@@ -58,7 +58,7 @@ impl Compiler {
             self.end_scope();
         }
         
-        // Patch all jumps to end
+        // patch all jumps to end
         self.patch_jump(else_jump);
         for jump in elseif_jumps {
             self.patch_jump(jump);

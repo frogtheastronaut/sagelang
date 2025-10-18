@@ -3,7 +3,7 @@ use super::chunk::Chunk;
 use super::opcode::OpCode;
 use std::collections::HashMap;
 
-/// Call frame for function calls
+// call frame for function calls
 #[derive(Debug, Clone)]
 pub struct CallFrame {
     pub chunk: Chunk,
@@ -11,7 +11,7 @@ pub struct CallFrame {
     pub stack_offset: usize,
 }
 
-/// Virtual Machine for executing bytecode
+/// virtual Machine for executing bytecode
 pub struct VM {
     pub stack: Vec<Value>,
     pub frames: Vec<CallFrame>,
@@ -54,7 +54,7 @@ impl VM {
             let ip = self.frames[frame_idx].ip;
             
             if ip >= self.frames[frame_idx].chunk.code.len() {
-                // End of chunk
+                // end of chunk
                 self.frames.pop();
                 if self.frames.is_empty() {
                     return Ok(());
@@ -66,7 +66,7 @@ impl VM {
             self.frames[frame_idx].ip += 1;
             
             if self.debug {
-                println!("Stack before {:?}: {:?}", instruction, self.stack);
+                println!("[DEBUG] Stack before {:?}: {:?}", instruction, self.stack);
             }
             
             match instruction {
@@ -121,7 +121,7 @@ impl VM {
                     if stack_offset + idx < self.stack.len() {
                         self.stack[stack_offset + idx] = value;
                     } else {
-                        // Extend stack if necessary
+                        // wxtend stack if necessary
                         while self.stack.len() <= stack_offset + idx {
                             self.stack.push(Value::Null);
                         }
@@ -278,23 +278,23 @@ impl VM {
                 }
                 
                 OpCode::Call(arg_count) => {
-                    // Stack layout: [..., func, arg1, arg2, ...argN]
-                    // The function is at position: stack.len() - arg_count - 1
+                    // stack layout: [..., func, arg1, arg2, ...argN]
+                    // tshe function is at position: stack.len() - arg_count - 1
                     let func_index = self.stack.len() - arg_count - 1;
                     let function = self.stack[func_index].clone();
                     
                     match function {
                         Value::Function { name: _, param_count, chunk } => {
-                            // Verify argument count
+                            // verify argument count
                             if arg_count != param_count {
                                 return Err(format!("Expected {} arguments but got {}", param_count, arg_count));
                             }
                             
-                            // Remove the function from the stack, keeping arguments
-                            // Stack layout after: [..., arg1, arg2, ...argN]
+                            // remove the function from the stack, keeping arguments
+                            // stack layout after: [..., arg1, arg2, ...argN]
                             self.stack.remove(func_index);
                             
-                            // Set up call frame with arguments on stack
+                            // set up call frame with arguments on stack
                             // stack_offset points to where arg1 now is
                             let stack_offset = self.stack.len() - arg_count;
                             
@@ -313,13 +313,13 @@ impl VM {
                 OpCode::Return => {
                     let return_value = self.stack.pop().unwrap_or(Value::Null);
                     
-                    // Pop the current frame
+                    // pop the current frame
                     let frame = self.frames.pop().ok_or("Frame stack underflow")?;
                     
-                    // Clean up the stack to the point before the function call
+                    // clean up the stack to the point before the function call
                     self.stack.truncate(frame.stack_offset);
                     
-                    // Push the return value
+                    // push the return value
                     self.stack.push(return_value);
                 }
                 

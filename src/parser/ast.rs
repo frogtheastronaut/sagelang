@@ -1,6 +1,3 @@
-/*
- * Abstract Syntax Tree
-*/
 use crate::lexer::tokens::Token;
 
 #[derive(Debug, Clone)]
