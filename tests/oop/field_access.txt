@@ -1,0 +1,56 @@
+// Test field access with different modifiers
+// Demonstrates how fields with different access levels work
+
+class DataContainer {
+    public publicField;
+    protected protectedField;
+    private privateField;
+    
+    function constructor() {
+        this.publicField = "Public data - accessible everywhere";
+        this.protectedField = "Protected data - accessible in class hierarchy";
+        this.privateField = "Private data - only in this class";
+    }
+    
+    public function displayAll() {
+        print "Public: " + this.publicField;
+        print "Protected: " + this.protectedField;
+        print "Private: " + this.privateField;
+    }
+    
+    public function modifyAll() {
+        this.publicField = "Modified public";
+        this.protectedField = "Modified protected";
+        this.privateField = "Modified private";
+    }
+}
+
+class DataSubContainer < DataContainer {
+    function constructor() {
+        this.publicField = "Public from sub";
+        this.protectedField = "Protected from sub";
+        // this.privateField = "Private from sub";  // Would fail - private not accessible
+    }
+    
+    public function displayAccessible() {
+        print "Sub can access public: " + this.publicField;
+        print "Sub can access protected: " + this.protectedField;
+        // print "Sub can access private: " + this.privateField;  // Would fail
+    }
+}
+
+let container = function DataContainer();
+container.displayAll();
+
+print "---";
+container.modifyAll();
+container.displayAll();
+
+print "---";
+print "External access to public: " + container.publicField;
+// print "External access to protected: " + container.protectedField;  // Would fail
+// print "External access to private: " + container.privateField;  // Would fail
+
+print "---";
+let subContainer = function DataSubContainer();
+subContainer.displayAccessible();

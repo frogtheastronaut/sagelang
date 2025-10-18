@@ -1,0 +1,50 @@
+// Test static methods
+// Static methods are called on the class, not instances
+
+class MathUtils {
+    static function add(a, b) {
+        return a + b;
+    }
+    
+    static function multiply(a, b) {
+        return a * b;
+    }
+    
+    static function factorial(n) {
+        if n <= 1 {
+            return 1;
+        }
+        return n * MathUtils.factfunction orial(n - 1);
+    }
+}
+
+class Counter {
+    function constructor(name) {
+        this.name = name;
+        this.id = Counter.nextfunction Id();
+    }
+    
+    static function nextId() {
+        return 1;  // Simplified - static fields not supported yet
+    }
+    
+    public function display() {
+        print this.name + " (ID: " + this.id + ")";
+    }
+}
+
+// Call static methods on class
+print "5 + 3 = " + MathUtils.add(5, 3);
+print "5 * 3 = " + MathUtils.multfunction iply(5, 3);
+print "5! = " + MathUtils.factfunction orial(5);
+
+print "---";
+
+// Static method usage in constructors
+let c1 = function Counter("First");
+let c2 = function Counter("Second");
+let c3 = function Counter("Third");
+
+c1.display();
+c2.display();
+c3.display();

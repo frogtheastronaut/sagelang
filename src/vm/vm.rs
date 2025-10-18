@@ -330,7 +330,7 @@ impl VM {
                             
                             self.frames.push(new_frame);
                         }
-                        Value::Class { name, methods, field_access, method_access, .. } => {
+                        Value::Class { name, methods, field_access, method_access, static_methods, .. } => {
                             // Calling a class creates an instance
                             use std::rc::Rc;
                             use std::cell::RefCell;
@@ -341,6 +341,7 @@ impl VM {
                                 field_access: field_access.clone(),
                                 methods: methods.clone(),
                                 method_access: method_access.clone(),
+                                static_methods: static_methods.clone(),
                             };
                             
                             // Remove class from stack
@@ -542,6 +543,7 @@ impl VM {
                                         field_access: field_access.clone(),
                                         methods: methods.clone(),
                                         method_access: method_access.clone(),
+                                        static_methods: HashMap::new(),
                                     }),
                                     method: Box::new(method.clone()),
                                 });
@@ -549,7 +551,16 @@ impl VM {
                                 return Err(format!("Undefined property '{}'", prop_name));
                             }
                         }
-                        _ => return Err("Only instances have properties".to_string()),
+                        Value::Class { static_methods, .. } => {
+                            // Accessing class property - check for static methods
+                            if let Some(static_method) = static_methods.get(&prop_name) {
+                                // Static methods are not bound - they're just regular functions
+                                self.stack.push(static_method.clone());
+                            } else {
+                                return Err(format!("Undefined static method '{}'", prop_name));
+                            }
+                        }
+                        _ => return Err("Only instances and classes have properties".to_string()),
                     }
                 }
                 
@@ -596,69 +607,6 @@ impl VM {
                     }
                 }
                 
-                OpCode::Invoke(name_idx, arg_count) => {
-                    // This is an optimization for method calls
-                    // For now, we'll implement it simply
-                    let name_value = self.frames[frame_idx].chunk.constants.get(name_idx).ok_or("Invalid constant index")?;
-                    let method_name = if let Value::String(n) = name_value {
-                        n.clone()
-                    } else {
-                        return Err("Method name must be a string".to_string());
-                    };
-                    
-                    // Pop arguments
-                    let mut args = Vec::new();
-                    for _ in 0..arg_count {
-                        args.push(self.stack.pop().ok_or("Stack underflow")?);
-                    }
-                    args.reverse();
-                    
-                    // Get instance
-                    let instance = self.stack.pop().ok_or("Stack underflow")?;
-                    
-                    // Get method and call it
-                    match instance {
-                        Value::Instance { methods, fields, class_name, field_access, method_access } => {
-                            if let Some(method) = methods.get(&method_name) {
-                                // Clone the class_name for use in the call frame before moving it into the pushed instance
-                                let class_name_for_context = class_name.clone();
-                                
-                                // Push instance back for 'this'
-                                self.stack.push(Value::Instance {
-                                    class_name,
-                                    fields,
-                                    field_access,
-                                    methods: methods.clone(),
-                                    method_access,
-                                });
-                                // Push arguments
-                                for arg in args {
-                                    self.stack.push(arg);
-                                }
-                                // Call the method
-                                if let Value::Function { chunk, .. } = method {
-                                    let func_index = self.stack.len() - arg_count - 1;
-                                    self.stack.remove(func_index);
-                                    
-                                    let stack_offset = self.stack.len() - arg_count;
-                                    let new_frame = CallFrame {
-                                        chunk: chunk.clone(),
-                                        ip: 0,
-                                        stack_offset,
-                                        class_context: Some(class_name_for_context), // Super method in class context
-                                    };
-                                    self.frames.push(new_frame);
-                                } else {
-                                    return Err("Method is not a function".to_string());
-                                }
-                            } else {
-                                return Err(format!("Undefined method '{}'", method_name));
-                            }
-                        }
-                        _ => return Err("Only instances have methods".to_string()),
-                    }
-                }
-                
                 OpCode::GetSuper(name_idx) => {
                     // Get the method name
                     let name_value = self.frames[frame_idx].chunk.constants.get(name_idx).ok_or("Invalid constant index")?;
@@ -679,7 +627,7 @@ impl VM {
                         Value::Class { methods, .. } => {
                             if let Some(method) = methods.get(&method_name) {
                                 // Bind the method to the instance
-                                if let Value::Instance { class_name, fields, field_access, methods: inst_methods, method_access } = instance {
+                                if let Value::Instance { class_name, fields, field_access, methods: inst_methods, method_access, static_methods } = instance {
                                     self.stack.push(Value::BoundMethod {
                                         receiver: Box::new(Value::Instance {
                                             class_name,
@@ -687,6 +635,7 @@ impl VM {
                                             field_access,
                                             methods: inst_methods,
                                             method_access,
+                                            static_methods,
                                         }),
                                         method: Box::new(method.clone()),
                                     });
@@ -711,14 +660,20 @@ impl VM {
                         return Err("Class name must be a string".to_string());
                     };
                     
-                    if let Value::Class { methods: super_methods, field_access: super_field_access, method_access: super_method_access, .. } = superclass {
+                    if let Value::Class { methods: super_methods, field_access: super_field_access, method_access: super_method_access, static_methods: super_static_methods, .. } = superclass {
                         // Get subclass from globals
-                        if let Some(Value::Class { name, superclass: _, methods: subclass_methods, field_access: subclass_field_access, method_access: subclass_method_access }) = self.globals.get(&subclass_name).cloned() {
+                        if let Some(Value::Class { name, superclass: _, methods: subclass_methods, field_access: subclass_field_access, method_access: subclass_method_access, static_methods: subclass_static_methods }) = self.globals.get(&subclass_name).cloned() {
                             // Merge: start with superclass methods, then add/override with subclass methods
                             let mut merged_methods = super_methods.clone();
                             // Subclass methods override superclass methods with same name
                             for (method_name, method_value) in subclass_methods {
                                 merged_methods.insert(method_name, method_value);
+                            }
+                            
+                            // Merge static methods
+                            let mut merged_static_methods = super_static_methods.clone();
+                            for (method_name, method_value) in subclass_static_methods {
+                                merged_static_methods.insert(method_name, method_value);
                             }
                             
                             // Merge access modifiers (subclass overrides)
@@ -740,10 +695,12 @@ impl VM {
                                     field_access: super_field_access.clone(),
                                     method_access: super_method_access.clone(),
                                     methods: super_methods.clone(),
+                                    static_methods: super_static_methods.clone(),
                                 })),
                                 field_access: merged_field_access,
                                 method_access: merged_method_access,
                                 methods: merged_methods,
+                                static_methods: merged_static_methods,
                             };
                             
                             self.globals.insert(subclass_name, new_class);

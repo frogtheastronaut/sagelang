@@ -1,0 +1,44 @@
+// Test constructor functionality
+// Constructors initialize new instances
+
+class Point {
+    function constructor(x, y) {
+        this.x = x;
+        this.y = y;
+        print "Created point at (" + x + ", " + y + ")";
+    }
+    
+    public function distance() {
+        // Distance from origin
+        return (this.x * this.x + this.y * this.y);  // Simplified - would need sqrt
+    }
+    
+    public function display() {
+        print "Point(" + this.x + ", " + this.y + ")";
+    }
+}
+
+class Point3D < Point {
+    function constructor(x, y, z) {
+        this.x = x;
+        this.y = y;
+        this.z = z;
+        print "Created 3D point at (" + x + ", " + y + ", " + z + ")";
+    }
+    
+    public function display() {
+        print "Point3D(" + this.x + ", " + this.y + ", " + this.z + ")";
+    }
+}
+
+// Test constructor with different arguments
+let p1 = function Point(3, 4);
+p1.display();
+
+let p2 = function Point(0, 0);
+p2.display();
+
+print "---";
+
+let p3d = function Point3D(1, 2, 3);
+p3d.display();

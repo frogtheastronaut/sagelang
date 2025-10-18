@@ -10,6 +10,8 @@ pub struct Compiler {
     pub locals: HashMap<String, usize>,
     pub local_count: usize,
     pub scope_depth: usize,
+    pub current_class: Option<String>,         // Current class being compiled
+    pub current_superclass: Option<String>,     // Superclass of current class
 }
 
 impl Compiler {
@@ -19,6 +21,8 @@ impl Compiler {
             locals: HashMap::new(),
             local_count: 0,
             scope_depth: 0,
+            current_class: None,
+            current_superclass: None,
         }
     }
     

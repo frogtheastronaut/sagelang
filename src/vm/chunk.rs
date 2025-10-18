@@ -174,10 +174,6 @@ impl Chunk {
                 println!("GetSuper {}", method_idx);
                 offset + 1
             }
-            OpCode::Invoke(name_idx, arg_count) => {
-                println!("Invoke {} ({})", name_idx, arg_count);
-                offset + 1
-            }
             OpCode::Inherit => {
                 println!("Inherit");
                 offset + 1

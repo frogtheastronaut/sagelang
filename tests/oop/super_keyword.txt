@@ -1,0 +1,40 @@
+// Test super keyword functionality
+// Super allows calling parent class methods
+
+class Animal {
+    function constructor(string name) {
+        this.name = name;
+    }
+    
+    public function speak() {
+        print this.name + " makes a sound";
+    }
+    
+    public function describe() {
+        print "This is an animal";
+    }
+}
+
+class Dog < Animal {
+    function constructor(string name, string breed) {
+        // Call parent constructor via super
+        super.constructor(name);
+        this.breed = breed;
+    }
+    
+    public function speak() {
+        // Call parent method first
+        super.speak();
+        print this.name + " barks!";
+    }
+    
+    public function describe() {
+        super.describe();
+        print "Specifically, a dog of breed: " + this.breed;
+    }
+}
+
+let dog = Dog("Buddy", "Golden Retriever");
+dog.speak();
+print "---";
+dog.describe();

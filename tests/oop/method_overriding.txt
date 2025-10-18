@@ -1,0 +1,45 @@
+// Test method overriding in detail
+// Subclasses override parent methods to change behavior
+
+class Printer {
+    public function print(message) {
+        print "[PRINTER] " + message;
+    }
+    
+    public function status() {
+        print "Printer ready";
+    }
+}
+
+class ColorPrinter < Printer {
+    public function print(message) {
+        print "[COLOR PRINTER] " + message + " (in color!)";
+    }
+    
+    public function status() {
+        print "Color printer ready with cyan, magenta, yellow, black";
+    }
+}
+
+class LaserPrinter < Printer {
+    public function print(message) {
+        print "[LASER PRINTER] " + message + " (high speed)";
+    }
+    
+    public function status() {
+        print "Laser printer ready - 50 pages per minute";
+    }
+}
+
+// Same method name, different implementations
+let printers = [
+    function Printer(),
+    function ColorPrinter(),
+    function LaserPrinter()
+];
+
+for printer in printers {
+    printer.stfunction atus();
+    printer.print("Hello World");
+    print "---";
+}

@@ -10,14 +10,20 @@ impl Compiler {
         let name_idx = self.chunk.add_constant(Value::String(name.to_string()));
         self.chunk.write(OpCode::DefineClass(name_idx));
         
-        // Compile methods
-        let mut method_map = HashMap::new();
+        // Compile methods - separate static and instance methods
+        let mut instance_method_map = HashMap::new();
+        let mut static_method_map = HashMap::new();
+        
         for method in methods {
             // Compile method body
             let mut method_compiler = Compiler::new();
             method_compiler.chunk.name = format!("{}::{}", name, method.name);
             
-            // Set up parameters (including 'this' as local 0)
+            // Set class context for super keyword support
+            method_compiler.current_class = Some(name.to_string());
+            method_compiler.current_superclass = superclass.clone();
+            
+            // Set up parameters (including 'this' as local 0 for instance methods)
             if !method.is_static {
                 method_compiler.locals.insert("this".to_string(), 0);
                 method_compiler.local_count = 1;
@@ -50,7 +56,12 @@ impl Compiler {
                 chunk: method_compiler.chunk,
             };
             
-            method_map.insert(method.name.clone(), method_value);
+            // Store in appropriate map based on static flag
+            if method.is_static {
+                static_method_map.insert(method.name.clone(), method_value);
+            } else {
+                instance_method_map.insert(method.name.clone(), method_value);
+            }
         }
         
         // Build field and method access maps
@@ -70,7 +81,8 @@ impl Compiler {
             superclass: None,
             field_access: field_access_map.clone(),
             method_access: method_access_map.clone(),
-            methods: method_map,
+            methods: instance_method_map,
+            static_methods: static_method_map,
         };
         
         let class_idx = self.chunk.add_constant(class_value);
@@ -78,6 +90,7 @@ impl Compiler {
         
         // Store class in global variable
         let name_idx = self.chunk.add_constant(Value::String(name.to_string()));
+
         self.chunk.write(OpCode::SetGlobal(name_idx));
         
         // Handle inheritance if there's a superclass
