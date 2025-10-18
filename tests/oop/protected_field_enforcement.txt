@@ -4,7 +4,7 @@ class Animal {
     protected energy;
     public name;
     
-    function constructor(string n) {
+    function constructor(n) {
         this.name = n;
         this.energy = 100;
     }
@@ -15,7 +15,7 @@ class Animal {
 }
 
 class Dog < Animal {
-    function constructor(string n) {
+    function constructor(n) {
         this.name = n;
         this.energy = 100;
     }

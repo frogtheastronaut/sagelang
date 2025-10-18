@@ -3,19 +3,19 @@
 class Calculator {
     public value;
     
-    function constructor(number v) {
+    function constructor(v) {
         this.value = v;
     }
     
-    private function validateNumber(number n) {
+    private function validateNumber(n) {
         return n > 0;
     }
     
-    public function add(number n) {
+    public function add(n) {
         let valid = this.validateNumber(n);
         if (valid) {
             this.value = this.value + n;
-            print "Added " + n + ", new value: " + this.value;
+            print "Added " + n + ", value: " + this.value;
         } else {
             print "Cannot add negative numbers!";
         }

@@ -2,7 +2,7 @@
 // Subclasses override parent methods to change behavior
 
 class Printer {
-    public function print(message) {
+    public function printMessage(message) {
         print "[PRINTER] " + message;
     }
     
@@ -12,7 +12,7 @@ class Printer {
 }
 
 class ColorPrinter < Printer {
-    public function print(message) {
+    public function printMessage(message) {
         print "[COLOR PRINTER] " + message + " (in color!)";
     }
     
@@ -22,8 +22,8 @@ class ColorPrinter < Printer {
 }
 
 class LaserPrinter < Printer {
-    public function print(message) {
-        print "[LASER PRINTER] " + message + " (high speed)";
+    public function printMessage(message) {
+        print "[LASER PRINTER] " + message + " (speed)";
     }
     
     public function status() {
@@ -31,15 +31,18 @@ class LaserPrinter < Printer {
     }
 }
 
-// Same method name, different implementations
-let printers = [
-    function Printer(),
-    function ColorPrinter(),
-    function LaserPrinter()
-];
+// same method name, different implementations
+let printer = new Printer();
+let cprinter = new ColorPrinter();
+let lprinter = new LaserPrinter();
 
-for printer in printers {
-    printer.stfunction atus();
-    printer.print("Hello World");
-    print "---";
-}
+printer.status();
+printer.printMessage("Hello World");
+print "---";
+
+cprinter.status();
+cprinter.printMessage("Hello World");
+print "---";
+
+lprinter.status();
+lprinter.printMessage("Hello World");

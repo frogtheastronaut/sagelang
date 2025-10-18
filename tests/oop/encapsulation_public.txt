@@ -35,21 +35,21 @@ class Student < Person {
 }
 
 // All public access works
-let person = function Person("Alice", 25);
-person.intfunction roduce();
+let person = new Person("Alice", 25);
+person.introduce();
 print "Direct access to name: " + person.name;
 print "Direct access to age: " + person.age;
 
-person.haveBirtfunction hday();
+person.haveBirthday();
 
 print "---";
 
-let student = function Student("Bob", 15, 10);
-student.intfunction roduce();
-student.stfunction udy();
+let student = new Student("Bob", 15, 10);
+student.introduce();
+student.study();
 
 // Can access and modify public fields directly
 student.name = "Robert";
 student.grade = 11;
-student.intfunction roduce();
-student.stfunction udy();
+student.introduce();
+student.study();

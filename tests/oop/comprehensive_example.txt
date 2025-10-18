@@ -2,13 +2,13 @@
 
 // Base class demonstrating encapsulation
 class Shape {
-    function constructor(string name) {
+    function constructor(name) {
         this.name = name;
         this.x = 0;
         this.y = 0;
     }
     
-    function move(number dx, number dy) {
+    function move(dx, dy) {
         this.x = this.x + dx;
         this.y = this.y + dy;
         print this.name + " moved to (" + this.x + ", " + this.y + ")";
@@ -22,7 +22,7 @@ class Shape {
 
 // Inheritance: Rectangle inherits from Shape
 class Rectangle < Shape {
-    function constructor(string name, number w, number h) {
+    function constructor(name, w, h) {
         this.name = name;
         this.x = 0;
         this.y = 0;
@@ -43,7 +43,7 @@ class Rectangle < Shape {
 
 // Another subclass demonstrating polymorphism
 class Circle < Shape {
-    function constructor(string name, number r) {
+    function constructor(name, r) {
         this.name = name;
         this.x = 0;
         this.y = 0;
@@ -71,7 +71,7 @@ print "=== Calling methods ===";
 rect.describe();
 
 print "";
-print "=== Polymorphism: Same method, different behavior ===";
+print "=== Polymorphism: Same method, behavior ===";
 print "Rectangle area: " + rect.area();
 print "Circle area: " + circ.area();
 

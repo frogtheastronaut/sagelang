@@ -1,5 +1,5 @@
 class Circle {
-    function constructor(number r) {
+    function constructor(r) {
         this.radius = r;
     }
     

@@ -5,6 +5,7 @@ pub mod ast;
 use crate::lexer::tokenizer::Tokenizer;
 use crate::parser::ast::Stmt;
 use crate::lexer::tokens::{Token, CurrentToken};
+use crate::error::errormsg;
 
 pub struct Parser<'a> {
     pub tokenizer: &'a mut Tokenizer<'a>,
@@ -33,7 +34,10 @@ impl<'a> Parser<'a> {
         if std::mem::discriminant(&self.current.token) == std::mem::discriminant(&expected) {
             self.advance();
         } else {
-            panic!("[ERR] Expected {:?}, got {:?} at line {}", expected, self.current.token, self.current.line);
+            errormsg::parser_error(
+                &format!("Expected {:?}, got {:?}", expected, self.current.token),
+                self.current.line
+            );
         }
     }
 }

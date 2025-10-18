@@ -4,6 +4,7 @@
 use crate::parser::Parser;
 use crate::parser::ast::Stmt;
 use crate::lexer::tokens::{Token};
+use crate::error::errormsg;
 
 // for statements like:
 // for (i in 1 .. 10) {  }, or
@@ -17,7 +18,7 @@ impl<'a> Parser<'a> {
         // this is the variable
         let var = match &self.current.token {
             Token::Identifier(id) => id.clone(),
-            _ => panic!("Expected variable name in for loop at line {}", self.current.line),
+            _ => errormsg::parser_error("Expected variable name in for loop", self.current.line),
         };
         self.advance();
         // eat in

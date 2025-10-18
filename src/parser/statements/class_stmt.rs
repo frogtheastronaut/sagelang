@@ -4,6 +4,7 @@
 use crate::parser::Parser;
 use crate::parser::ast::{Stmt, Method, Param, Field, AccessModifier};
 use crate::lexer::tokens::Token;
+use crate::error::errormsg;
 
 impl<'a> Parser<'a> {
     pub fn class_declaration(&mut self) -> Stmt {
@@ -15,7 +16,7 @@ impl<'a> Parser<'a> {
             self.advance();
             name
         } else {
-            panic!("Expected class name");
+            errormsg::parser_error("Expected class name", self.current.line);
         };
         
         // Check for superclass
@@ -26,7 +27,7 @@ impl<'a> Parser<'a> {
                 self.advance();
                 Some(super_name)
             } else {
-                panic!("Expected superclass name");
+                errormsg::parser_error("Expected superclass name", self.current.line);
             }
         } else {
             None
@@ -34,7 +35,7 @@ impl<'a> Parser<'a> {
         
         // Expect opening brace
         if !matches!(self.current.token, Token::OpenBrace) {
-            panic!("Expected '{{' after class name");
+            errormsg::parser_error("Expected '{' after class name", self.current.line);
         }
         self.advance();
         
@@ -71,40 +72,48 @@ impl<'a> Parser<'a> {
                 self.advance();
             
             // Get method name
-            let method_name = if let Token::Identifier(n) = &self.current.token {
-                let name = n.clone();
-                self.advance();
-                name
-            } else {
-                panic!("Expected method name");
+            let method_name = match &self.current.token {
+                Token::Identifier(n) => {
+                    let name = n.clone();
+                    self.advance();
+                    name
+                }
+                Token::PrintKw | Token::Return | Token::StrKw | Token::NumKw | 
+                Token::BoolKw | Token::ListKw | Token::StaticKw | Token::If | 
+                Token::Else | Token::ElseIfKw | Token::WhileKw | Token::ForKw |
+                Token::Let | Token::Fn | Token::InKw | Token::ClassKw | 
+                Token::ThisKw | Token::SuperKw | Token::NewKw | Token::PrivateKw |
+                Token::PublicKw | Token::ProtectedKw => {
+                    errormsg::parser_error(
+                        &format!("Cannot use keyword '{:?}' as method name", self.current.token),
+                        self.current.line
+                    );
+                }
+                _ => {
+                    errormsg::parser_error("Expected method name", self.current.line);
+                }
             };
             
             // Expect opening paren
             if !matches!(self.current.token, Token::LParen) {
-                panic!("Expected '(' after method name");
+                errormsg::parser_error("Expected '(' after method name", self.current.line);
             }
             self.advance();
             
-            // Parse parameters
+            // Parse parameters (without type annotations)
             let mut params = Vec::new();
             while !matches!(self.current.token, Token::RParen) {
-                // Get parameter type
-                let param_type = if let Token::Identifier(t) = &self.current.token {
-                    let type_name = t.clone();
-                    self.advance();
-                    type_name
-                } else {
-                    panic!("Expected parameter type");
-                };
-                
-                // Get parameter name
+                // Get parameter name directly
                 let param_name = if let Token::Identifier(n) = &self.current.token {
                     let name = n.clone();
                     self.advance();
                     name
                 } else {
-                    panic!("Expected parameter name");
+                    errormsg::parser_error("Expected parameter name", self.current.line);
                 };
+                
+                // Type is no longer required - use empty string as placeholder
+                let param_type = String::new();
                 
                 params.push(Param { param_name, param_type });
                 
@@ -115,13 +124,13 @@ impl<'a> Parser<'a> {
             
             // Consume closing paren
             if !matches!(self.current.token, Token::RParen) {
-                panic!("Expected ')' after parameters");
+                errormsg::parser_error("Expected ')' after parameters", self.current.line);
             }
             self.advance();
             
             // Parse method body
             if !matches!(self.current.token, Token::OpenBrace) {
-                panic!("Expected '{{' before method body");
+                errormsg::parser_error("Expected '{' before method body", self.current.line);
             }
             self.advance();
             
@@ -132,7 +141,7 @@ impl<'a> Parser<'a> {
             
             // Consume closing brace
             if !matches!(self.current.token, Token::CloseBrace) {
-                panic!("Expected '}}' after method body");
+                errormsg::parser_error("Expected '}' after method body", self.current.line);
             }
             self.advance();
             
@@ -150,7 +159,7 @@ impl<'a> Parser<'a> {
                 
                 // Expect semicolon
                 if !matches!(self.current.token, Token::Semicolon) {
-                    panic!("Expected ';' after field declaration");
+                    errormsg::parser_error("Expected ';' after field declaration", self.current.line);
                 }
                 self.advance();
                 
@@ -159,13 +168,13 @@ impl<'a> Parser<'a> {
                     access,
                 });
             } else {
-                panic!("Expected 'function' or field name in class body");
+                errormsg::parser_error("Expected 'function' or field name in class body", self.current.line);
             }
         }
         
         // Consume closing brace
         if !matches!(self.current.token, Token::CloseBrace) {
-            panic!("Expected '}}' after class body");
+            errormsg::parser_error("Expected '}' after class body", self.current.line);
         }
         self.advance();
         

@@ -66,6 +66,7 @@ pub enum Token {
     PrivateKw, // private keyword
     PublicKw,  // public keyword
     ProtectedKw, // protected keyword
+    NewKw,    // new keyword
 
     // other
     Comma, // ,
@@ -140,5 +141,6 @@ pub fn keywords() -> HashMap<&'static str, Token> {
     map.insert("private", Token::PrivateKw);
     map.insert("public", Token::PublicKw);
     map.insert("protected", Token::ProtectedKw);
+    map.insert("new", Token::NewKw);
     map
 }

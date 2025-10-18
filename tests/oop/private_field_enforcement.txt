@@ -4,7 +4,7 @@ class BankAccount {
     private balance;
     public accountHolder;
     
-    function constructor(string holder, number initial) {
+    function constructor(holder, initial) {
         this.accountHolder = holder;
         this.balance = initial;
     }

@@ -14,37 +14,37 @@ class MathUtils {
         if n <= 1 {
             return 1;
         }
-        return n * MathUtils.factfunction orial(n - 1);
+        return n * MathUtils.factorial(n - 1);
     }
 }
 
 class Counter {
     function constructor(name) {
         this.name = name;
-        this.id = Counter.nextfunction Id();
+        this.id = Counter.nextId(0);
     }
     
-    static function nextId() {
-        return 1;  // Simplified - static fields not supported yet
+    static function nextId(dummy) {
+        return 1;
     }
     
-    public function display() {
+    public function display(dummy) {
         print this.name + " (ID: " + this.id + ")";
     }
 }
 
 // Call static methods on class
 print "5 + 3 = " + MathUtils.add(5, 3);
-print "5 * 3 = " + MathUtils.multfunction iply(5, 3);
-print "5! = " + MathUtils.factfunction orial(5);
+print "5 * 3 = " + MathUtils.multiply(5, 3);
+print "5! = " + MathUtils.factorial(5);
 
 print "---";
 
 // Static method usage in constructors
-let c1 = function Counter("First");
-let c2 = function Counter("Second");
-let c3 = function Counter("Third");
+let c1 = Counter("First");
+let c2 = Counter("Second");
+let c3 = Counter("Third");
 
-c1.display();
-c2.display();
-c3.display();
+c1.display(0);
+c2.display(0);
+c3.display(0);

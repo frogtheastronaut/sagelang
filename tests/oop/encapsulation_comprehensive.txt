@@ -7,7 +7,7 @@ class Animal {
     // Public fields
     public name;
     
-    function constructor(string n, number legs) {
+    function constructor(n, legs) {
         this.name = n;
         this.numberOfLegs = legs;
     }
@@ -18,7 +18,7 @@ class Animal {
     }
     
     // Public method - accessible from anywhere
-    public function setNumberOfLegs(number legs) {
+    public function setNumberOfLegs(legs) {
         this.numberOfLegs = legs;
     }
     
@@ -34,7 +34,7 @@ dog.describe();
 
 print "";
 print "=== Accessor/Mutator Pattern ===";
-print "Number of legs (via getter): " + dog.getNumberOfLegs();
+print "Number of legs (getter): " + dog.getNumberOfLegs();
 dog.setNumberOfLegs(3);
 print "After setting to 3: " + dog.getNumberOfLegs();
 dog.describe();
@@ -46,7 +46,7 @@ class Mammal {
     protected species;
     public name;
     
-    function constructor(string n, string s) {
+    function constructor(n, s) {
         this.name = n;
         this.species = s;
     }
@@ -61,7 +61,7 @@ class Mammal {
 }
 
 class Cat < Mammal {
-    function constructor(string n) {
+    function constructor(n) {
         this.name = n;
         this.species = "Felis catus";
     }
@@ -81,12 +81,12 @@ class BankAccount {
     private balance;
     public accountHolder;
     
-    function constructor(string holder, number initial) {
+    function constructor(holder, initial) {
         this.accountHolder = holder;
         this.balance = initial;
     }
     
-    public function deposit(number amount) {
+    public function deposit(amount) {
         this.balance = this.balance + amount;
         print "Deposited " + amount + ". New balance: " + this.balance;
     }
@@ -96,11 +96,11 @@ class BankAccount {
     }
     
     // Private method - only accessible within class
-    private function validateWithdrawal(number amount) {
+    private function validateWithdrawal(amount) {
         return this.balance >= amount;
     }
     
-    public function withdraw(number amount) {
+    public function withdraw(amount) {
         let canWithdraw = this.validateWithdrawal(amount);
         if (canWithdraw) {
             this.balance = this.balance - amount;

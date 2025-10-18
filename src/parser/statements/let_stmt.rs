@@ -4,6 +4,7 @@
 use crate::parser::Parser;
 use crate::parser::ast::Stmt;
 use crate::lexer::tokens::{Token};
+use crate::error::errormsg;
 
 impl<'a> Parser<'a> {
     pub fn let_stmt(&mut self) -> Stmt {
@@ -11,7 +12,7 @@ impl<'a> Parser<'a> {
 
         let name = match &self.current.token {
             Token::Identifier(id) => id.clone(),
-            _ => panic!("Expected identifier after let at line {}", self.current.line),
+            _ => errormsg::parser_error("Expected identifier after let", self.current.line),
         };
         self.advance();
 

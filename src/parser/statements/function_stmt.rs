@@ -4,6 +4,7 @@
 use crate::parser::Parser;
 use crate::parser::ast::Stmt;
 use crate::lexer::tokens::{Token};
+use crate::error::errormsg;
 
 impl<'a> Parser<'a> {
     pub fn function_stmt(&mut self) -> Stmt {
@@ -13,7 +14,7 @@ impl<'a> Parser<'a> {
         // this is the function name
         let name = match &self.current.token {
             Token::Identifier(id) => id.clone(),
-            _ => panic!("Expected function name at line {}", self.current.line),
+            _ => errormsg::parser_error("Expected function name", self.current.line),
         };
         self.advance();
 
@@ -37,7 +38,7 @@ impl<'a> Parser<'a> {
                         Token::Identifier(id) => {
                             params.push(crate::parser::ast::Param { param_name: id.clone(), param_type: param_type.to_string() });
                         }
-                        _ => panic!("Expected identifier after type in function parameters at line {}", self.current.line),
+                        _ => errormsg::parser_error("Expected identifier after type in function parameters", self.current.line),
                     }
                     self.advance();
                 } else {
@@ -45,7 +46,7 @@ impl<'a> Parser<'a> {
                         Token::Identifier(id) => {
                             params.push(crate::parser::ast::Param { param_name: id.clone(), param_type: String::new() });
                         }
-                        _ => panic!("Expected identifier in function parameters at line {}", self.current.line),
+                        _ => errormsg::parser_error("Expected identifier in function parameters", self.current.line),
                     }
                     self.advance();
                 }

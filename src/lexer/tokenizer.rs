@@ -1,6 +1,7 @@
 use crate::lexer::Lexer;
 use crate::lexer::tokens::{Token, CurrentToken, default_symbol_map, multi_char_ops, keywords};
 use std::collections::HashMap;
+use crate::error::errormsg;
 
 pub struct Tokenizer<'a> {
     lexer: &'a mut Lexer,
@@ -126,7 +127,7 @@ impl<'a> Tokenizer<'a> {
                     self.lexer.advance();
                     tok.clone()
                 } else {
-                    panic!("Unexpected character: {} at line {}", c, line);
+                    errormsg::lexer_error(&format!("Unexpected character: '{}'", c));
                 }
             }
             None => Token::EOF,

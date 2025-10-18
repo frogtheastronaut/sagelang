@@ -39,7 +39,7 @@ class DataSubContainer < DataContainer {
     }
 }
 
-let container = function DataContainer();
+let container = new DataContainer();
 container.displayAll();
 
 print "---";
@@ -52,5 +52,5 @@ print "External access to public: " + container.publicField;
 // print "External access to private: " + container.privateField;  // Would fail
 
 print "---";
-let subContainer = function DataSubContainer();
+let subContainer = new DataSubContainer();
 subContainer.displayAccessible();

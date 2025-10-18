@@ -2,7 +2,7 @@
 // Super allows calling parent class methods
 
 class Animal {
-    function constructor(string name) {
+    function constructor(name) {
         this.name = name;
     }
     
@@ -16,7 +16,7 @@ class Animal {
 }
 
 class Dog < Animal {
-    function constructor(string name, string breed) {
+    function constructor(name, breed) {
         // Call parent constructor via super
         super.constructor(name);
         this.breed = breed;

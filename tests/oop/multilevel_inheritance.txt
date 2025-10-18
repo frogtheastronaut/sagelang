@@ -1,5 +1,5 @@
 class Test {
-    function constructor(string n) {
+    function constructor(n) {
         print "Constructor called";
         print n;
     }

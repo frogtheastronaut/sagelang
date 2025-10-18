@@ -31,7 +31,7 @@ class Manager < Employee {
         print "Manager: " + this.name;
         print "Department: " + this.department;
         print "Salary: " + this.salary;  // Can access protected field
-        print "Bonus: " + this.calculatfunction eBonus();  // Can call protected method
+        print "Bonus: " + this.calculateBonus();  // Can call protected method
     }
     
     public function giveRaise(amount) {
@@ -40,16 +40,16 @@ class Manager < Employee {
     }
 }
 
-let emp = function Employee("John", 50000);
+let emp = new Employee("John", 50000);
 emp.displayInfo();
 
 print "---";
 
-let mgr = function Manager("Sarah", 80000, "Engineering");
+let mgr = new Manager("Sarah", 80000, "Engineering");
 mgr.displayInfo();
 mgr.giveRaise(10000);
 mgr.displayInfo();
 
 // These should fail - protected access from outside
 // print emp.salary;  // Error: Cannot access protected field from outside
-// emp.calculatfunction eBonus();  // Error: Cannot access protected method from outside
+// emp.calculateBonus();  // Error: Cannot access protected method from outside

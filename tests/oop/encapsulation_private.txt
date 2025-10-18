@@ -24,7 +24,7 @@ class BankAccount {
     }
     
     public function withdraw(amount) {
-        if this.validatfunction eAmount(amount) {
+        if this.validateAmount(amount) {
             if this.balance >= amount {
                 this.balance = this.balance - amount;
                 print "Withdrawn: " + amount;
@@ -40,15 +40,15 @@ class BankAccount {
     }
 }
 
-let account = function BankAccount(1000);
-print "Initial balance: " + account.getfunction Balance();
+let account = new BankAccount(1000);
+print "Initial balance: " + account.getBalance();
 
 account.deposit(500);
-print "Balance after deposit: " + account.getfunction Balance();
+print "Balance after deposit: " + account.getBalance();
 
-account.witfunction hdraw(300);
-print "Balance after withdrawal: " + account.getfunction Balance();
+account.withdraw(300);
+print "Balance after withdrawal: " + account.getBalance();
 
 // These should fail - private access
 // print account.balance;  // Error: Cannot access private field
-// account.validatfunction eAmount(100);  // Error: Cannot access private method
+// account.validateAmount(100);  // Error: Cannot access private method

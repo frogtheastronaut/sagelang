@@ -11,6 +11,7 @@ pub mod class_stmt;
 use crate::parser::Parser;
 use crate::parser::ast::Stmt;
 use crate::lexer::tokens::{Token};
+use crate::error::errormsg;
 
 impl<'a> Parser<'a> {
     pub fn statement(&mut self) -> Stmt {
@@ -51,7 +52,7 @@ impl<'a> Parser<'a> {
                             // Simple variable assignment
                             Stmt::Assign { name, value }
                         }
-                        _ => panic!("Invalid assignment target"),
+                        _ => errormsg::parser_error("Invalid assignment target", self.current.line),
                     }
                 } else {
                     // It's just an expression statement

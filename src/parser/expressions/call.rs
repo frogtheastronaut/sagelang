@@ -4,10 +4,22 @@
 use crate::parser::Parser;
 use crate::parser::ast::Expr;
 use crate::lexer::tokens::Token;
+use crate::error::errormsg;
 
 impl<'a> Parser<'a> {
     pub fn call(&mut self) -> Expr {
         let mut expr = match &self.current.token {
+            Token::NewKw => {
+                self.advance();
+                // Expect class name
+                if let Token::Identifier(class_name) = &self.current.token {
+                    let name = class_name.clone();
+                    self.advance();
+                    Expr::Identifier(name)
+                } else {
+                    errormsg::parser_error("Expected class name after 'new'", self.current.line);
+                }
+            }
             Token::ThisKw => {
                 self.advance();
                 Expr::This
@@ -20,7 +32,7 @@ impl<'a> Parser<'a> {
                     self.advance();
                     Expr::Super { method: method_name }
                 } else {
-                    panic!("Expected method name after 'super.'");
+                    errormsg::parser_error("Expected method name after 'super.'", self.current.line);
                 }
             }
             Token::Identifier(name) => {
@@ -51,7 +63,9 @@ impl<'a> Parser<'a> {
                     Token::StringLit(s) => Expr::StringLit(s.clone()),
                     Token::Bool(b) => Expr::Bool(*b),
                     Token::Identifier(id) => Expr::Identifier(id.clone()),
-                    _ => panic!("[ERR] Unsupported list element: {:?}", tok),
+                    _ => {
+                        errormsg::parser_error(&format!("Unsupported list element: {:?}", tok), 0);
+                    }
                 }).collect();
                 self.advance();
                 Expr::List(expr_items)
@@ -69,9 +83,17 @@ impl<'a> Parser<'a> {
                 Expr::List(items)
             }
             Token::ElseIfKw | Token::If | Token::Let | Token::Fn | Token::Return | Token::WhileKw | Token::ForKw | Token::PrintKw | Token::Else => {
-                panic!("[ERR] Unexpected statement keyword in expression: {:?} at line {}", self.current.token, self.current.line)
+                errormsg::parser_error(
+                    &format!("Unexpected statement keyword in expression: {:?}", self.current.token),
+                    self.current.line
+                );
             }
-            _ => panic!("[ERR] Unexpected token in call: {:?} at line {}", self.current.token, self.current.line),
+            _ => {
+                errormsg::parser_error(
+                    &format!("Unexpected token in call: {:?}", self.current.token),
+                    self.current.line
+                );
+            }
         };
 
         loop {
@@ -102,7 +124,7 @@ impl<'a> Parser<'a> {
                             name: prop_name,
                         };
                     } else {
-                        panic!("Expected property name after '.'");
+                        errormsg::parser_error("Expected property name after '.'", self.current.line);
                     }
                 }
                 _ => break,

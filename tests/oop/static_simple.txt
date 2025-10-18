@@ -1,7 +1,7 @@
 // Simple static method test
 
 class MathUtils {
-    static function add(string a, string b) {
+    static function add(a, b) {
         return a + b;
     }
 }

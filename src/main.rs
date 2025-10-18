@@ -3,9 +3,11 @@ mod parser;
 mod interpreter;
 mod compiler;
 mod vm;
+mod error;
 
 use std::fs;
 use std::env;
+use crate::error::errormsg;
 
 fn main() {
     // get command line args
@@ -40,8 +42,7 @@ fn main() {
     let chunk = match compiler.compile(&ast) {
         Ok(chunk) => chunk,
         Err(e) => {
-            eprintln!("[ERR] Compilation error: {}", e);
-            return;
+            errormsg::error(&format!("Compilation error: {}", e));
         }
     };
 
@@ -50,6 +51,6 @@ fn main() {
     vm.debug = debug;
     
     if let Err(e) = vm.run(chunk) {
-        eprintln!("[ERR] Runtime error: {}", e);
+        errormsg::runtime_error(&e);
     }
 }

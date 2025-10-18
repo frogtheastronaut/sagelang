@@ -1,6 +1,6 @@
 // Basic class with encapsulation
 class Animal {
-    function constructor(string n) {
+    function constructor(n) {
         this.name = n;
         this.energy = 100;
     }
@@ -18,7 +18,7 @@ class Animal {
 
 // Inheritance and polymorphism
 class Dog < Animal {
-    function constructor(string n, string b) {
+    function constructor(n, b) {
         this.name = n;
         this.energy = 100;
         this.breed = b;
