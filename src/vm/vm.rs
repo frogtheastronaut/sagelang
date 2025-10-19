@@ -30,6 +30,20 @@ impl VM {
         }
     }
     
+    fn get_current_line(&self) -> usize {
+        if let Some(frame) = self.frames.last() {
+            let ip = if frame.ip > 0 { frame.ip - 1 } else { 0 };
+            frame.chunk.lines.get(ip).copied().unwrap_or(0)
+        } else {
+            0
+        }
+    }
+    
+    fn runtime_error(&self, message: &str) -> String {
+        let line = self.get_current_line();
+        format!("{} [line {}]", message, line)
+    }
+    
     pub fn run(&mut self, chunk: Chunk) -> Result<(), String> {
         if self.debug {
             chunk.disassemble();
@@ -93,7 +107,7 @@ impl VM {
                     let name = if let Value::String(s) = &self.frames[frame_idx].chunk.constants[idx] {
                         s.clone()
                     } else {
-                        return Err("Invalid global variable name".to_string());
+                        return Err(self.runtime_error("Invalid global variable name"));
                     };
                     
                     let value = self.globals.get(&name).cloned().unwrap_or(Value::Null);
@@ -104,7 +118,7 @@ impl VM {
                     let name = if let Value::String(s) = &self.frames[frame_idx].chunk.constants[idx] {
                         s.clone()
                     } else {
-                        return Err("Invalid global variable name".to_string());
+                        return Err(self.runtime_error("Invalid global variable name"));
                     };
                     
                     let value = self.stack.last().cloned().unwrap_or(Value::Null);
@@ -193,6 +207,9 @@ impl VM {
                     let a = self.stack.pop().ok_or("Stack underflow")?;
                     match (&a, &b) {
                         (Value::Number(x), Value::Number(y)) => {
+                            if *y == 0.0 {
+                                return Err(self.runtime_error("Division by zero"));
+                            }
                             self.stack.push(Value::Number(x / y));
                         }
                         _ => self.stack.push(Value::Null),
@@ -310,7 +327,7 @@ impl VM {
                         Value::Function { name: _, param_count, chunk } => {
                             // verify argument count
                             if arg_count != param_count {
-                                return Err(format!("Expected {} arguments but got {}", param_count, arg_count));
+                                return Err(self.runtime_error(&format!("Expected {} arguments but got {}", param_count, arg_count)));
                             }
                             
                             // remove the function from the stack, keeping arguments
@@ -358,7 +375,7 @@ impl VM {
                                 // Call constructor
                                 if let Value::Function { param_count, chunk, .. } = constructor {
                                     if arg_count != *param_count {
-                                        return Err(format!("Expected {} arguments but got {}", param_count, arg_count));
+                                        return Err(self.runtime_error(&format!("Expected {} arguments but got {}", param_count, arg_count)));
                                     }
                                     
                                     let stack_offset = args_start; // 'this' is now at args_start
@@ -393,7 +410,7 @@ impl VM {
                             // Call the method
                             if let Value::Function { param_count, chunk, .. } = *method {
                                 if arg_count != param_count {
-                                    return Err(format!("Expected {} arguments but got {}", param_count, arg_count));
+                                    return Err(self.runtime_error(&format!("Expected {} arguments but got {}", param_count, arg_count)));
                                 }
                                 
                                 let stack_offset = self.stack.len() - arg_count - 1;
@@ -405,10 +422,10 @@ impl VM {
                                 };
                                 self.frames.push(new_frame);
                             } else {
-                                return Err("Bound method must wrap a function".to_string());
+                                return Err(self.runtime_error("Bound method must wrap a function"));
                             }
                         }
-                        _ => return Err("Attempted to call non-callable".to_string()),
+                        _ => return Err(self.runtime_error("Attempted to call non-callable")),
                     }
                 }
                 
@@ -495,14 +512,14 @@ impl VM {
                                         AccessModifier::Private => {
                                             // Private: only accessible within same class
                                             if current_context.as_ref() != Some(&class_name) {
-                                                return Err(format!("Cannot access private field '{}' from outside class", prop_name));
+                                                return Err(self.runtime_error(&format!("Cannot access private field '{}' from outside class", prop_name)));
                                             }
                                         }
                                         AccessModifier::Protected => {
                                             // Protected: accessible within class and subclasses
                                             // For now, just check if we're in any class context
                                             if current_context.is_none() {
-                                                return Err(format!("Cannot access protected field '{}' from outside class hierarchy", prop_name));
+                                                return Err(self.runtime_error(&format!("Cannot access protected field '{}' from outside class hierarchy", prop_name)));
                                             }
                                         }
                                         AccessModifier::Public => {
@@ -521,13 +538,13 @@ impl VM {
                                         AccessModifier::Private => {
                                             // Private: only accessible within same class
                                             if current_context.as_ref() != Some(&class_name) {
-                                                return Err(format!("Cannot access private method '{}' from outside class", prop_name));
+                                                return Err(self.runtime_error(&format!("Cannot access private method '{}' from outside class", prop_name)));
                                             }
                                         }
                                         AccessModifier::Protected => {
                                             // Protected: accessible within class and subclasses
                                             if current_context.is_none() {
-                                                return Err(format!("Cannot access protected method '{}' from outside class hierarchy", prop_name));
+                                                return Err(self.runtime_error(&format!("Cannot access protected method '{}' from outside class hierarchy", prop_name)));
                                             }
                                         }
                                         AccessModifier::Public => {
@@ -548,7 +565,7 @@ impl VM {
                                     method: Box::new(method.clone()),
                                 });
                             } else {
-                                return Err(format!("Undefined property '{}'", prop_name));
+                                return Err(self.runtime_error(&format!("Undefined property '{}'", prop_name)));
                             }
                         }
                         Value::Class { static_methods, .. } => {
@@ -557,10 +574,10 @@ impl VM {
                                 // Static methods are not bound - they're just regular functions
                                 self.stack.push(static_method.clone());
                             } else {
-                                return Err(format!("Undefined static method '{}'", prop_name));
+                                return Err(self.runtime_error(&format!("Undefined static method '{}'", prop_name)));
                             }
                         }
-                        _ => return Err("Only instances and classes have properties".to_string()),
+                        _ => return Err(self.runtime_error("Only instances and classes have properties")),
                     }
                 }
                 
@@ -571,7 +588,7 @@ impl VM {
                     let prop_name = if let Value::String(n) = name_value {
                         n.clone()
                     } else {
-                        return Err("Property name must be a string".to_string());
+                        return Err(self.runtime_error("Property name must be a string"));
                     };
                     
                     match instance {
@@ -586,13 +603,13 @@ impl VM {
                                     AccessModifier::Private => {
                                         // Private: only accessible within same class
                                         if current_context.as_ref() != Some(&class_name) {
-                                            return Err(format!("Cannot set private field '{}' from outside class", prop_name));
+                                            return Err(self.runtime_error(&format!("Cannot set private field '{}' from outside class", prop_name)));
                                         }
                                     }
                                     AccessModifier::Protected => {
                                         // Protected: accessible within class and subclasses
                                         if current_context.is_none() {
-                                            return Err(format!("Cannot set protected field '{}' from outside class hierarchy", prop_name));
+                                            return Err(self.runtime_error(&format!("Cannot set protected field '{}' from outside class hierarchy", prop_name)));
                                         }
                                     }
                                     AccessModifier::Public => {
@@ -603,7 +620,7 @@ impl VM {
                             fields.borrow_mut().insert(prop_name, value.clone());
                             self.stack.push(value);
                         }
-                        _ => return Err("Only instances have fields".to_string()),
+                        _ => return Err(self.runtime_error("Only instances have fields")),
                     }
                 }
                 
@@ -613,7 +630,7 @@ impl VM {
                     let method_name = if let Value::String(n) = name_value {
                         n.clone()
                     } else {
-                        return Err("Method name must be a string".to_string());
+                        return Err(self.runtime_error("Method name must be a string"));
                     };
                     
                     // Get the superclass from stack
@@ -640,13 +657,13 @@ impl VM {
                                         method: Box::new(method.clone()),
                                     });
                                 } else {
-                                    return Err("Super can only be used with instances".to_string());
+                                    return Err(self.runtime_error("Super can only be used with instances"));
                                 }
                             } else {
-                                return Err(format!("Undefined method '{}' in superclass", method_name));
+                                return Err(self.runtime_error(&format!("Undefined method '{}' in superclass", method_name)));
                             }
                         }
-                        _ => return Err("Superclass must be a class".to_string()),
+                        _ => return Err(self.runtime_error("Superclass must be a class")),
                     }
                 }
                 
@@ -657,7 +674,7 @@ impl VM {
                     let subclass_name = if let Value::String(n) = subclass_name_val {
                         n
                     } else {
-                        return Err("Class name must be a string".to_string());
+                        return Err(self.runtime_error("Class name must be a string"));
                     };
                     
                     if let Value::Class { methods: super_methods, field_access: super_field_access, method_access: super_method_access, static_methods: super_static_methods, .. } = superclass {
@@ -706,7 +723,7 @@ impl VM {
                             self.globals.insert(subclass_name, new_class);
                         }
                     } else {
-                        return Err("Superclass must be a class".to_string());
+                        return Err(self.runtime_error("Superclass must be a class"));
                     }
                 }
                 

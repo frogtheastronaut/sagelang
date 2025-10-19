@@ -9,7 +9,7 @@ impl Compiler {
             self.compile_expr(item)?;
         }
         // create list from stack items
-        self.chunk.write(OpCode::MakeList(items.len()));
+        self.chunk.write(OpCode::MakeList(items.len()), self.current_line);
         Ok(())
     }
 }

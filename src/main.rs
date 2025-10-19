@@ -8,6 +8,11 @@ mod error;
 use std::fs;
 use std::env;
 use crate::error::errormsg;
+use colored::Colorize;
+
+fn debug_print(message: &str) {
+    println!("{} {}", "[DEBUG]".bright_blue(), message);
+}
 
 fn main() {
     // get command line args
@@ -34,7 +39,7 @@ fn main() {
         // write AST to ast.txt for debugging
         let ast_str = format!("{:?}", ast);
         fs::write("ast.txt", ast_str).expect("[ERR] Failed to write AST");
-        print!("[SAGE] Wrote AST")
+        debug_print("AST written to ast.txt");
     }
 
     // compile to bytecode
@@ -51,6 +56,16 @@ fn main() {
     vm.debug = debug;
     
     if let Err(e) = vm.run(chunk) {
-        errormsg::runtime_error(&e);
+        // Try to extract line number from error message
+        if let Some(line_str) = e.strip_suffix(']').and_then(|s| s.rsplit("[line ").next()) {
+            if let Ok(line) = line_str.parse::<usize>() {
+                let message = e.split(" [line ").next().unwrap_or(&e);
+                errormsg::runtime_error(message, line);
+            } else {
+                errormsg::runtime_error(&e, 0);
+            }
+        } else {
+            errormsg::runtime_error(&e, 0);
+        }
     }
 }

@@ -11,11 +11,11 @@ impl Compiler {
         if self.scope_depth > 0 {
             let idx = self.local_count;
             self.locals.insert(name.to_string(), idx);
-            self.chunk.write(OpCode::SetLocal(idx));
+            self.chunk.write(OpCode::SetLocal(idx), self.current_line);
             self.local_count += 1;
         } else {
             let name_idx = self.chunk.add_constant(Value::String(name.to_string()));
-            self.chunk.write(OpCode::SetGlobal(name_idx));
+            self.chunk.write(OpCode::SetGlobal(name_idx), self.current_line);
         }
         
         Ok(())

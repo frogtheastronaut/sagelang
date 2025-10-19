@@ -8,6 +8,7 @@ use crate::error::errormsg;
 
 impl<'a> Parser<'a> {
     pub fn class_declaration(&mut self) -> Stmt {
+        let line = self.current.line;
         // class keyword already consumed
         
         // Get class name
@@ -183,6 +184,7 @@ impl<'a> Parser<'a> {
             superclass,
             fields,
             methods,
+            line,
         }
     }
 }

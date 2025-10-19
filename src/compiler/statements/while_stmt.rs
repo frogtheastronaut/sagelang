@@ -11,7 +11,7 @@ impl Compiler {
         
         // exit loop if condition is false
         let exit_jump = self.emit_jump(OpCode::JumpIfFalse(0));
-        self.chunk.write(OpCode::Pop);
+        self.chunk.write(OpCode::Pop, self.current_line);
         
         // compile body
         self.begin_scope();
@@ -21,11 +21,11 @@ impl Compiler {
         self.end_scope();
         
         // loop back to condition
-        self.chunk.write(OpCode::Loop(loop_start));
+        self.chunk.write(OpCode::Loop(loop_start), self.current_line);
         
         // patch exit jump
         self.patch_jump(exit_jump);
-        self.chunk.write(OpCode::Pop);
+        self.chunk.write(OpCode::Pop, self.current_line);
         
         Ok(())
     }

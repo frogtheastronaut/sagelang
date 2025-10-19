@@ -8,6 +8,7 @@ use crate::error::errormsg;
 
 impl<'a> Parser<'a> {
     pub fn let_stmt(&mut self) -> Stmt {
+        let line = self.current.line;
         self.eat(Token::Let);
 
         let name = match &self.current.token {
@@ -22,6 +23,6 @@ impl<'a> Parser<'a> {
 
         self.eat(Token::Semicolon);
 
-        Stmt::VarDecl { name, value }
+        Stmt::VarDecl { name, value, line }
     }
 }

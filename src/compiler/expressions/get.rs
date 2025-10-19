@@ -10,7 +10,7 @@ impl Compiler {
         
         // Get the property
         let name_idx = self.chunk.add_constant(Value::String(name.to_string()));
-        self.chunk.write(OpCode::GetProperty(name_idx));
+        self.chunk.write(OpCode::GetProperty(name_idx), self.current_line);
         
         Ok(())
     }

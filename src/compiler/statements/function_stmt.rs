@@ -21,8 +21,8 @@ impl Compiler {
         }
         
         // ensure function returns something
-        func_compiler.chunk.write(OpCode::LoadNull);
-        func_compiler.chunk.write(OpCode::Return);
+        func_compiler.chunk.write(OpCode::LoadNull, 0);
+        func_compiler.chunk.write(OpCode::Return, 0);
         
         // create compiled function value
         let func_value = Value::Function {
@@ -32,17 +32,17 @@ impl Compiler {
         };
         
         let const_idx = self.chunk.add_constant(func_value);
-        self.chunk.write(OpCode::LoadConst(const_idx));
+        self.chunk.write(OpCode::LoadConst(const_idx), self.current_line);
         
         // store function in variable
         if self.scope_depth > 0 {
             let idx = self.local_count;
             self.locals.insert(name.to_string(), idx);
-            self.chunk.write(OpCode::SetLocal(idx));
+            self.chunk.write(OpCode::SetLocal(idx), self.current_line);
             self.local_count += 1;
         } else {
             let name_idx = self.chunk.add_constant(Value::String(name.to_string()));
-            self.chunk.write(OpCode::SetGlobal(name_idx));
+            self.chunk.write(OpCode::SetGlobal(name_idx), self.current_line);
         }
         
         Ok(())

@@ -13,7 +13,7 @@ impl Compiler {
         }
         
         // call with argument count
-        self.chunk.write(OpCode::Call(args.len()));
+        self.chunk.write(OpCode::Call(args.len()), self.current_line);
         
         Ok(())
     }

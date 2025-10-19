@@ -1,1 +1,0 @@
-cargo build && for file in tests/*.txt; do echo "=== $file ==="; ./target/debug/sagelang "$file"; echo; done

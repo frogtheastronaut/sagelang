@@ -11,6 +11,7 @@ use crate::error::errormsg;
 // for (i in list) { }
 impl<'a> Parser<'a> {
     pub fn for_stmt(&mut self) -> Stmt {
+        let line = self.current.line;
         // eat for 
         self.eat(Token::ForKw);
         // eat (
@@ -31,6 +32,6 @@ impl<'a> Parser<'a> {
         let body = self.block_stmt();
 
         // return for loop
-        Stmt::For { var, iterable, body }
+        Stmt::For { var, iterable, body, line }
     }
 }

@@ -8,6 +8,7 @@ use crate::error::errormsg;
 
 impl<'a> Parser<'a> {
     pub fn function_stmt(&mut self) -> Stmt {
+        let line = self.current.line;
         // eat function
         self.eat(Token::Fn);
 
@@ -66,6 +67,6 @@ impl<'a> Parser<'a> {
         let body = self.block_stmt();
 
         // return function
-        Stmt::Function { name, params, body }
+        Stmt::Function { name, params, body, line }
     }
 }

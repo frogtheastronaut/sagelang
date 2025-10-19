@@ -7,6 +7,7 @@ use crate::lexer::tokens::{Token};
 
 impl<'a> Parser<'a> {
     pub fn return_stmt(&mut self) -> Stmt {
+        let line = self.current.line;
         self.eat(Token::Return);
 
         let value = if self.current.token != Token::Semicolon {
@@ -17,6 +18,6 @@ impl<'a> Parser<'a> {
 
         self.eat(Token::Semicolon);
 
-        Stmt::Return(value)
+        Stmt::Return { value, line }
     }
 }

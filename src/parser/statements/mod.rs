@@ -20,7 +20,10 @@ impl<'a> Parser<'a> {
             Token::Fn => self.function_stmt(),
             Token::If => self.if_stmt(),
             Token::Return => self.return_stmt(),
-            Token::OpenBrace => Stmt::Block(self.block_stmt()),
+            Token::OpenBrace => {
+                let line = self.current.line;
+                Stmt::Block { stmts: self.block_stmt(), line }
+            }
             Token::WhileKw => self.while_stmt(),
             Token::ForKw => self.for_stmt(),
             Token::PrintKw => self.print_stmt(),
@@ -34,36 +37,43 @@ impl<'a> Parser<'a> {
                 
                 // Check if it's followed by assignment
                 if matches!(self.current.token, Token::Assign) {
+                    let line = self.current.line;
                     self.advance(); // consume '='
                     let value = self.expr();
                     self.eat(Token::Semicolon);
                     
                     // Check if it's property assignment or variable assignment
                     match expr {
-                        crate::parser::ast::Expr::Get { object, name } => {
+                        crate::parser::ast::Expr::Get { object, name, .. } => {
                             // Convert Get to Set
-                            Stmt::ExprStmt(crate::parser::ast::Expr::Set {
-                                object,
-                                name,
-                                value: Box::new(value),
-                            })
+                            Stmt::ExprStmt {
+                                expr: crate::parser::ast::Expr::Set {
+                                    object,
+                                    name,
+                                    value: Box::new(value),
+                                    line,
+                                },
+                                line,
+                            }
                         }
-                        crate::parser::ast::Expr::Identifier(name) => {
+                        crate::parser::ast::Expr::Identifier { name, .. } => {
                             // Simple variable assignment
-                            Stmt::Assign { name, value }
+                            Stmt::Assign { name, value, line }
                         }
                         _ => errormsg::parser_error("Invalid assignment target", self.current.line),
                     }
                 } else {
+                    let line = expr.line();
                     // It's just an expression statement
                     self.eat(Token::Semicolon);
-                    Stmt::ExprStmt(expr)
+                    Stmt::ExprStmt { expr, line }
                 }
             }
             _ => {
                 let expr = self.expr();
+                let line = expr.line();
                 self.eat(Token::Semicolon);
-                Stmt::ExprStmt(expr)
+                Stmt::ExprStmt { expr, line }
             }
         }
     }

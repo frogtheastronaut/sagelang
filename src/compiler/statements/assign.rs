@@ -9,11 +9,11 @@ impl Compiler {
         
         // check if it's a local variable first
         if let Some(&idx) = self.locals.get(name) {
-            self.chunk.write(OpCode::SetLocal(idx));
+            self.chunk.write(OpCode::SetLocal(idx), self.current_line);
         } else {
             // it's global
             let name_idx = self.chunk.add_constant(Value::String(name.to_string()));
-            self.chunk.write(OpCode::SetGlobal(name_idx));
+            self.chunk.write(OpCode::SetGlobal(name_idx), self.current_line);
         }
         
         Ok(())

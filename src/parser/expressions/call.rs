@@ -14,63 +14,72 @@ impl<'a> Parser<'a> {
                 // Expect class name
                 if let Token::Identifier(class_name) = &self.current.token {
                     let name = class_name.clone();
+                    let id_line = self.current.line;
                     self.advance();
-                    Expr::Identifier(name)
+                    Expr::Identifier { name, line: id_line }
                 } else {
                     errormsg::parser_error("Expected class name after 'new'", self.current.line);
                 }
             }
             Token::ThisKw => {
+                let this_line = self.current.line;
                 self.advance();
-                Expr::This
+                Expr::This { line: this_line }
             }
             Token::SuperKw => {
+                let super_line = self.current.line;
                 self.advance();
                 self.eat(Token::Dot);
                 if let Token::Identifier(method) = &self.current.token {
                     let method_name = method.clone();
                     self.advance();
-                    Expr::Super { method: method_name }
+                    Expr::Super { method: method_name, line: super_line }
                 } else {
                     errormsg::parser_error("Expected method name after 'super.'", self.current.line);
                 }
             }
             Token::Identifier(name) => {
                 let id = name.clone();
+                let id_line = self.current.line;
                 self.advance();
-                Expr::Identifier(id)
+                Expr::Identifier { name: id, line: id_line }
             }
             Token::LParen => self.grouping(),
             Token::Number(n) => {
                 let num = *n;
+                let num_line = self.current.line;
                 self.advance();
-                Expr::Number(num)
+                Expr::Number { value: num, line: num_line }
             }
             Token::StringLit(s) => {
                 let val = s.clone();
+                let str_line = self.current.line;
                 self.advance();
-                Expr::StringLit(val)
+                Expr::StringLit { value: val, line: str_line }
             }
             Token::Bool(b) => {
                 let val = *b;
+                let bool_line = self.current.line;
                 self.advance();
-                Expr::Bool(val)
+                Expr::Bool { value: val, line: bool_line }
             }
             Token::List(items) => {
+                let list_line = self.current.line;
                 // convert Vec<Token> to Vec<Expr>
                 let expr_items = items.iter().map(|tok| match tok {
-                    Token::Number(n) => Expr::Number(*n),
-                    Token::StringLit(s) => Expr::StringLit(s.clone()),
-                    Token::Bool(b) => Expr::Bool(*b),
-                    Token::Identifier(id) => Expr::Identifier(id.clone()),
+                    Token::Number(n) => Expr::Number { value: *n, line: list_line },
+                    Token::StringLit(s) => Expr::StringLit { value: s.clone(), line: list_line },
+                    Token::Bool(b) => Expr::Bool { value: *b, line: list_line },
+                    Token::Identifier(id) => Expr::Identifier { name: id.clone(), line: list_line },
                     _ => {
                         errormsg::parser_error(&format!("Unsupported list element: {:?}", tok), 0);
                     }
                 }).collect();
                 self.advance();
-                Expr::List(expr_items)
+                Expr::List { items: expr_items, line: list_line }
             }
             Token::LBracket => {
+                let bracket_line = self.current.line;
                 self.advance();
                 let mut items = Vec::new();
                 while self.current.token != Token::RBracket && self.current.token != Token::EOF {
@@ -80,7 +89,7 @@ impl<'a> Parser<'a> {
                     }
                 }
                 self.eat(Token::RBracket);
-                Expr::List(items)
+                Expr::List { items, line: bracket_line }
             }
             Token::ElseIfKw | Token::If | Token::Let | Token::Fn | Token::Return | Token::WhileKw | Token::ForKw | Token::PrintKw | Token::Else => {
                 errormsg::parser_error(
@@ -99,6 +108,7 @@ impl<'a> Parser<'a> {
         loop {
             match &self.current.token {
                 Token::LParen => {
+                    let line = self.current.line;
                     self.advance();
                     let mut args = Vec::new();
                     if self.current.token != Token::RParen {
@@ -112,9 +122,11 @@ impl<'a> Parser<'a> {
                     expr = Expr::Call {
                         callee: Box::new(expr),
                         args,
+                        line,
                     };
                 }
                 Token::Dot => {
+                    let line = self.current.line;
                     self.advance();
                     if let Token::Identifier(name) = &self.current.token {
                         let prop_name = name.clone();
@@ -122,6 +134,7 @@ impl<'a> Parser<'a> {
                         expr = Expr::Get {
                             object: Box::new(expr),
                             name: prop_name,
+                            line,
                         };
                     } else {
                         errormsg::parser_error("Expected property name after '.'", self.current.line);

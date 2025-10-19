@@ -6,6 +6,7 @@ use super::opcode::OpCode;
 pub struct Chunk {
     pub code: Vec<OpCode>,
     pub constants: Vec<Value>,
+    pub lines: Vec<usize>,  // line numbers corresponding to each opcode
     pub name: String,
 }
 
@@ -14,13 +15,15 @@ impl Chunk {
         Chunk {
             code: Vec::new(),
             constants: Vec::new(),
+            lines: Vec::new(),
             name,
         }
     }
     
     // add an instruction to the chunk
-    pub fn write(&mut self, op: OpCode) {
+    pub fn write(&mut self, op: OpCode, line: usize) {
         self.code.push(op);
+        self.lines.push(line);
     }
     
     // add a constant to the constant pool and return its index

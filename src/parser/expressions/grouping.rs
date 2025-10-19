@@ -7,9 +7,10 @@ use crate::lexer::tokens::Token;
 
 impl<'a> Parser<'a> {
     pub fn grouping(&mut self) -> Expr {
+        let line = self.current.line;
         self.eat(Token::LParen);
         let expr = self.expr();
         self.eat(Token::RParen);
-        Expr::Grouping(Box::new(expr))
+        Expr::Grouping { expr: Box::new(expr), line }
     }
 }

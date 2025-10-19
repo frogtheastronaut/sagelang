@@ -17,35 +17,35 @@ impl Compiler {
         
         // store iterable
         let iterable_idx = self.local_count;
-        self.chunk.write(OpCode::SetLocal(iterable_idx));
+        self.chunk.write(OpCode::SetLocal(iterable_idx), self.current_line);
         self.local_count += 1;
         
         // initialize counter to 0
         let zero_const = self.chunk.add_constant(Value::Number(0.0));
-        self.chunk.write(OpCode::LoadConst(zero_const));
+        self.chunk.write(OpCode::LoadConst(zero_const), self.current_line);
         let counter_idx = self.local_count;
-        self.chunk.write(OpCode::SetLocal(counter_idx));
+        self.chunk.write(OpCode::SetLocal(counter_idx), self.current_line);
         self.local_count += 1;
         
         // loop start
         let loop_start = self.chunk.code.len();
         
         // get current item from list
-        self.chunk.write(OpCode::GetLocal(iterable_idx));
-        self.chunk.write(OpCode::GetLocal(counter_idx));
-        self.chunk.write(OpCode::GetIndex);
+        self.chunk.write(OpCode::GetLocal(iterable_idx), self.current_line);
+        self.chunk.write(OpCode::GetLocal(counter_idx), self.current_line);
+        self.chunk.write(OpCode::GetIndex, self.current_line);
         
         // check if we got null (end of list)
-        self.chunk.write(OpCode::Dup);
-        self.chunk.write(OpCode::LoadNull);
-        self.chunk.write(OpCode::Equal);
+        self.chunk.write(OpCode::Dup, self.current_line);
+        self.chunk.write(OpCode::LoadNull, self.current_line);
+        self.chunk.write(OpCode::Equal, self.current_line);
         let exit_jump = self.emit_jump(OpCode::JumpIfTrue(0));
-        self.chunk.write(OpCode::Pop);
+        self.chunk.write(OpCode::Pop, self.current_line);
         
         // store current item in loop variable
         let var_idx = self.local_count;
         self.locals.insert(var.to_string(), var_idx);
-        self.chunk.write(OpCode::SetLocal(var_idx));
+        self.chunk.write(OpCode::SetLocal(var_idx), self.current_line);
         self.local_count += 1;
         
         // compile body
@@ -54,19 +54,19 @@ impl Compiler {
         }
         
         // increment counter
-        self.chunk.write(OpCode::GetLocal(counter_idx));
+        self.chunk.write(OpCode::GetLocal(counter_idx), self.current_line);
         let one_const = self.chunk.add_constant(Value::Number(1.0));
-        self.chunk.write(OpCode::LoadConst(one_const));
-        self.chunk.write(OpCode::Add);
-        self.chunk.write(OpCode::SetLocal(counter_idx));
-        self.chunk.write(OpCode::Pop);
+        self.chunk.write(OpCode::LoadConst(one_const), self.current_line);
+        self.chunk.write(OpCode::Add, self.current_line);
+        self.chunk.write(OpCode::SetLocal(counter_idx), self.current_line);
+        self.chunk.write(OpCode::Pop, self.current_line);
         
         // loop back
-        self.chunk.write(OpCode::Loop(loop_start));
+        self.chunk.write(OpCode::Loop(loop_start), self.current_line);
         
         // patch exit
         self.patch_jump(exit_jump);
-        self.chunk.write(OpCode::Pop); // Pop the comparison result
+        self.chunk.write(OpCode::Pop, self.current_line); // Pop the comparison result
         
         self.end_scope();
         

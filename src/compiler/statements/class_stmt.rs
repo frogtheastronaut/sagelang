@@ -8,7 +8,7 @@ impl Compiler {
     pub fn compile_class_stmt(&mut self, name: &str, superclass: &Option<String>, fields: &[Field], methods: &[Method]) -> Result<(), String> {
         // Create the class first (will be stored in globals)
         let name_idx = self.chunk.add_constant(Value::String(name.to_string()));
-        self.chunk.write(OpCode::DefineClass(name_idx));
+        self.chunk.write(OpCode::DefineClass(name_idx), self.current_line);
         
         // Compile methods - separate static and instance methods
         let mut instance_method_map = HashMap::new();
@@ -43,11 +43,11 @@ impl Compiler {
             // Ensure method returns something
             // For constructors, return 'this'. For regular methods, return null.
             if method.name == "constructor" {
-                method_compiler.chunk.write(OpCode::GetLocal(0)); // Get 'this'
+                method_compiler.chunk.write(OpCode::GetLocal(0), 0); // Get 'this'
             } else {
-                method_compiler.chunk.write(OpCode::LoadNull);
+                method_compiler.chunk.write(OpCode::LoadNull, 0);
             }
-            method_compiler.chunk.write(OpCode::Return);
+            method_compiler.chunk.write(OpCode::Return, 0);
             
             // Create method value
             let method_value = Value::Function {
@@ -86,12 +86,12 @@ impl Compiler {
         };
         
         let class_idx = self.chunk.add_constant(class_value);
-        self.chunk.write(OpCode::LoadConst(class_idx));
+        self.chunk.write(OpCode::LoadConst(class_idx), self.current_line);
         
         // Store class in global variable
         let name_idx = self.chunk.add_constant(Value::String(name.to_string()));
 
-        self.chunk.write(OpCode::SetGlobal(name_idx));
+        self.chunk.write(OpCode::SetGlobal(name_idx), self.current_line);
         
         // Handle inheritance if there's a superclass
         if let Some(super_name) = superclass {
@@ -100,10 +100,10 @@ impl Compiler {
             
             // Load subclass name
             let class_name_const = self.chunk.add_constant(Value::String(name.to_string()));
-            self.chunk.write(OpCode::LoadConst(class_name_const));
+            self.chunk.write(OpCode::LoadConst(class_name_const), self.current_line);
             
             // Inherit from superclass
-            self.chunk.write(OpCode::Inherit);
+            self.chunk.write(OpCode::Inherit, self.current_line);
         }
         
         Ok(())

@@ -10,6 +10,7 @@ impl<'a> Parser<'a> {
         let mut node = self.factor();
 
         while matches!(self.current.token, Token::Plus | Token::Minus | Token::DotDot) {
+            let line = self.current.line;
             let op = self.current.token.clone();
             self.advance();
             let right = self.factor();
@@ -17,6 +18,7 @@ impl<'a> Parser<'a> {
                 left: Box::new(node),
                 op,
                 right: Box::new(right),
+                line,
             };
         }
 

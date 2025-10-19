@@ -7,9 +7,9 @@ impl Compiler {
         if let Some(e) = expr {
             self.compile_expr(e)?;
         } else {
-            self.chunk.write(OpCode::LoadNull);
+            self.chunk.write(OpCode::LoadNull, self.current_line);
         }
-        self.chunk.write(OpCode::Return);
+        self.chunk.write(OpCode::Return, self.current_line);
         Ok(())
     }
 }

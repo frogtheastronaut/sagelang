@@ -13,7 +13,7 @@ impl Compiler {
         
         // Set the property
         let name_idx = self.chunk.add_constant(Value::String(name.to_string()));
-        self.chunk.write(OpCode::SetProperty(name_idx));
+        self.chunk.write(OpCode::SetProperty(name_idx), self.current_line);
         
         Ok(())
     }

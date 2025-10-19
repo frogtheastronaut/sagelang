@@ -7,6 +7,7 @@ use crate::lexer::tokens::{Token};
 
 impl<'a> Parser<'a> {
     pub fn if_stmt(&mut self) -> Stmt {
+        let line = self.current.line;
         self.eat(Token::If);
         let condition = self.expr();
         let then_branch = self.block_stmt();
@@ -28,6 +29,7 @@ impl<'a> Parser<'a> {
             then_branch,
             else_branch,
             elseif_branches,
+            line,
         }
     }
 }

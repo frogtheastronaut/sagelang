@@ -15,7 +15,7 @@ impl Compiler {
         
         // jump to else if condition is false
         let then_jump = self.emit_jump(OpCode::JumpIfFalse(0));
-        self.chunk.write(OpCode::Pop); // Pop condition
+        self.chunk.write(OpCode::Pop, self.current_line); // Pop condition
         
         // compile then branch
         self.begin_scope();
@@ -29,14 +29,14 @@ impl Compiler {
         
         // patch then jump to point here
         self.patch_jump(then_jump);
-        self.chunk.write(OpCode::Pop); // Pop condition
+        self.chunk.write(OpCode::Pop, self.current_line); // Pop condition
         
         // handle elseif branches
         let mut elseif_jumps = Vec::new();
         for (elseif_cond, elseif_body) in elseif_branches {
             self.compile_expr(elseif_cond)?;
             let elseif_then_jump = self.emit_jump(OpCode::JumpIfFalse(0));
-            self.chunk.write(OpCode::Pop);
+            self.chunk.write(OpCode::Pop, self.current_line);
             
             self.begin_scope();
             for stmt in elseif_body {
@@ -46,7 +46,7 @@ impl Compiler {
             
             elseif_jumps.push(self.emit_jump(OpCode::Jump(0)));
             self.patch_jump(elseif_then_jump);
-            self.chunk.write(OpCode::Pop);
+            self.chunk.write(OpCode::Pop, self.current_line);
         }
         
         // compile else branch if it exists

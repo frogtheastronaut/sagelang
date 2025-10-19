@@ -1,21 +1,24 @@
 use std::process;
+use colored::Colorize;
+
+fn error_title() -> colored::ColoredString {
+    "[ERR]".bold().red()
+}
 
 pub fn parser_error(message: &str, line: usize) -> ! {
-    eprintln!("[ERR] Parse error: {} at line {}", message, line);
+    eprintln!("{} Parse error: {} at line {}", error_title(), message, line);
     process::exit(1);
 }
-
 pub fn lexer_error(message: &str) -> ! {
-    eprintln!("[ERR] Lexer error: {}", message);
+    eprintln!("{} Lexer error: {}", error_title(), message);
     process::exit(1);
 }
 
-pub fn runtime_error(message: &str) -> ! {
-    eprintln!("[ERR] Runtime error: {}", message);
+pub fn runtime_error(message: &str, line: usize) -> ! {
+    eprintln!("{} Runtime error: {} at line {}", error_title(), message, line);
     process::exit(1);
 }
-
 pub fn error(message: &str) -> ! {
-    eprintln!("[ERR] {}", message);
+    eprintln!("{} {}", error_title(), message);
     process::exit(1);
 }
