@@ -10,9 +10,9 @@ pub struct Compiler {
     pub locals: HashMap<String, usize>,
     pub local_count: usize,
     pub scope_depth: usize,
-    pub current_class: Option<String>,         // Current class being compiled
-    pub current_superclass: Option<String>,     // Superclass of current class
-    pub current_line: usize,                    // Current line number for error reporting
+    pub current_class: Option<String>,
+    pub current_superclass: Option<String>,
+    pub current_line: usize,
 }
 
 impl Compiler {
@@ -81,7 +81,6 @@ impl Compiler {
     fn end_scope(&mut self) {
         self.scope_depth -= 1;
         
-        // remove locals that went out of scope
         let mut to_remove = Vec::new();
         for (name, &idx) in &self.locals {
             if idx >= self.local_count {

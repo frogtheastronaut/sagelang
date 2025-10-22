@@ -1,6 +1,3 @@
-/*
- * parser for unary expressions.
- */
 use crate::parser::Parser;
 use crate::parser::ast::Expr;
 use crate::lexer::tokens::Token;

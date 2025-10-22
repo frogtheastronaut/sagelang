@@ -10,12 +10,7 @@ use std::env;
 use crate::error::errormsg;
 use colored::Colorize;
 
-fn debug_print(message: &str) {
-    println!("{} {}", "[DEBUG]".bright_blue(), message);
-}
-
 fn main() {
-    // get command line args
     let args: Vec<String> = env::args().collect();
     if args.len() < 2 {
         eprintln!("Usage: {} <filename> [--debug]", args[0]);
@@ -24,11 +19,9 @@ fn main() {
     let filename = &args[1];
     let debug = args.len() > 2 && args[2] == "--debug";
 
-    // read the file into a string
     let contents = fs::read_to_string(filename)
         .expect("Something went wrong reading the file");
 
-    // create the lexer and tokenizer
     let mut lexer = lexer::Lexer::new(&contents);
     let mut tokenizer = lexer::Tokenizer::new(&mut lexer);
     let mut parser = parser::Parser::new(&mut tokenizer);
@@ -36,13 +29,11 @@ fn main() {
     let ast = parser.parse();
     
     if debug {
-        // write AST to ast.txt for debugging
         let ast_str = format!("{:?}", ast);
         fs::write("ast.txt", ast_str).expect("[ERR] Failed to write AST");
-        debug_print("AST written to ast.txt");
+        println!("{} {}", "[DEBUG]".bright_blue(), "AST written to ast.txt");
     }
 
-    // compile to bytecode
     let mut compiler = compiler::Compiler::new();
     let chunk = match compiler.compile(&ast) {
         Ok(chunk) => chunk,
@@ -51,12 +42,10 @@ fn main() {
         }
     };
 
-    // run in VM
     let mut vm = vm::VM::new();
     vm.debug = debug;
     
     if let Err(e) = vm.run(chunk) {
-        // Try to extract line number from error message
         if let Some(line_str) = e.strip_suffix(']').and_then(|s| s.rsplit("[line ").next()) {
             if let Ok(line) = line_str.parse::<usize>() {
                 let message = e.split(" [line ").next().unwrap_or(&e);

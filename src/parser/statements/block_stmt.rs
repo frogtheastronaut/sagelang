@@ -1,6 +1,3 @@
-/*
- * parser for block {} statements
- */
 use crate::parser::Parser;
 use crate::parser::ast::Stmt;
 use crate::lexer::tokens::{Token};

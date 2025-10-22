@@ -1,6 +1,3 @@
-/*
- * parser for function calls
- */
 use crate::parser::Parser;
 use crate::parser::ast::Expr;
 use crate::lexer::tokens::Token;
@@ -11,7 +8,7 @@ impl<'a> Parser<'a> {
         let mut expr = match &self.current.token {
             Token::NewKw => {
                 self.advance();
-                // Expect class name
+                // expect class name
                 if let Token::Identifier(class_name) = &self.current.token {
                     let name = class_name.clone();
                     let id_line = self.current.line;

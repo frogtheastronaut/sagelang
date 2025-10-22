@@ -19,7 +19,7 @@ impl<'a> Tokenizer<'a> {
             keywords: keywords(),
         }
     }
-	// parse numbers
+
     fn number(&mut self) -> Token {
         let mut num_str = String::new();
         let mut has_dot = false;
@@ -28,7 +28,6 @@ impl<'a> Tokenizer<'a> {
             if c.is_ascii_digit() {
                 num_str.push(c);
             } else if c == '.' && !has_dot {
-				// number has decimal point
                 has_dot = true;
                 num_str.push(c);
             } else {
@@ -39,12 +38,10 @@ impl<'a> Tokenizer<'a> {
 
         Token::Number(num_str.parse::<f64>().unwrap())
     }
-    // skip comments
+
     fn skip_comment(&mut self) {
-        // advance past both slashes
         self.lexer.advance();
         self.lexer.advance();
-        // skip until end of line or EOF
         while let Some(c) = self.lexer.current_char() {
             if c == '\n' {
                 break;
@@ -53,7 +50,6 @@ impl<'a> Tokenizer<'a> {
         }
     }
 
-	// parse identifiers and keywords
     fn identifier(&mut self) -> Token {
         let mut id = String::new();
 
@@ -66,17 +62,15 @@ impl<'a> Tokenizer<'a> {
             }
         }
 
-        // check if it's a keyword
         if let Some(keyword_token) = self.keywords.get(id.as_str()) {
             keyword_token.clone()
         } else if let Some(op_token) = self.multi_ops.get(id.as_str()) {
             op_token.clone()
         } else {
-            // it's a regular identifier
             Token::Identifier(id)
         }
     }
-	// parse multi-character operators
+
     fn multi_char_op(&mut self) -> Option<Token> {
         let c1 = self.lexer.current_char()?;
         let c2 = self.lexer.peek_char()?;
@@ -90,16 +84,15 @@ impl<'a> Tokenizer<'a> {
             None
         }
     }
-    // get next token
+
     pub fn next_token(&mut self) -> CurrentToken {
         self.lexer.skip_whitespace();
         let line = self.lexer.line;
 
-        // handle comments
         if let Some('/') = self.lexer.current_char() {
             if let Some('/') = self.lexer.peek_char() {
                 self.skip_comment();
-                return self.next_token(); // get the next token
+                return self.next_token();
             }
         }
 
@@ -135,9 +128,8 @@ impl<'a> Tokenizer<'a> {
         CurrentToken { token, line }
     }
 
-    // parse string literals
     fn string_lit(&mut self) -> Token {
-        self.lexer.advance(); // skip opening quote
+        self.lexer.advance();
         let mut s = String::new();
         while let Some(c) = self.lexer.current_char() {
             if c == '"' {
@@ -157,9 +149,8 @@ impl<'a> Tokenizer<'a> {
         Token::StringLit(s)
     }
 
-    // parse list literals
     fn list_lit(&mut self) -> Token {
-        self.lexer.advance(); // skip [
+        self.lexer.advance();
         let mut items = Vec::new();
         loop {
             self.lexer.skip_whitespace();
@@ -168,7 +159,6 @@ impl<'a> Tokenizer<'a> {
                     self.lexer.advance();
                     break;
                 }
-                // parse item (number, string, bool, identifier)
                 let item = self.next_token();
                 if item.token != Token::RBracket && item.token != Token::EOF {
                     items.push(item.token);

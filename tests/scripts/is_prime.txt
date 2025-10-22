@@ -1,5 +1,5 @@
 // check if number is prime
-function is_prime(num n) {
+function is_prime(n) {
     if (n <= 1) {
         return false;
     }

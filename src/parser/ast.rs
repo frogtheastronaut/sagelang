@@ -12,7 +12,6 @@ pub enum AccessModifier {
 #[allow(dead_code)]
 pub struct Param {
     pub param_name: String,
-    pub param_type: String,
 }
 
 #[derive(Debug, Clone)]

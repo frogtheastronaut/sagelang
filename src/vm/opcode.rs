@@ -45,14 +45,14 @@ pub enum OpCode {
     GetIndex,               // get item from list by index
     
     // OOP-related
-    DefineClass(usize),     // Define a class with name index
-    GetProperty(usize),     // Get property from object (name index)
-    SetProperty(usize),     // Set property on object (name index)
-    GetSuper(usize),        // Get method from superclass (name index)
-    Inherit,                // Set up inheritance
-    
+    DefineClass(usize),     // define a class with name index
+    GetProperty(usize),     // get property from object (name index)
+    SetProperty(usize),     // set property on object (name index)
+    GetSuper(usize),        // get method from superclass (name index)
+    Inherit,                // set up inheritance
+
     // Other
-    Pop,                    // Pop and discard top of stack
-    Print,                  // Print top of stack
-    Dup,                    // Duplicate top of stack
+    Pop,                    // pop and discard top of stack
+    Print,                  // print top of stack
+    Dup,                    // duplicate top of stack
 }

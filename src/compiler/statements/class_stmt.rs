@@ -6,24 +6,24 @@ use std::collections::HashMap;
 
 impl Compiler {
     pub fn compile_class_stmt(&mut self, name: &str, superclass: &Option<String>, fields: &[Field], methods: &[Method]) -> Result<(), String> {
-        // Create the class first (will be stored in globals)
+        // create the class first (will be stored in globals)
         let name_idx = self.chunk.add_constant(Value::String(name.to_string()));
         self.chunk.write(OpCode::DefineClass(name_idx), self.current_line);
         
-        // Compile methods - separate static and instance methods
+        // compile methods
         let mut instance_method_map = HashMap::new();
         let mut static_method_map = HashMap::new();
         
         for method in methods {
-            // Compile method body
+            // compile method body
             let mut method_compiler = Compiler::new();
             method_compiler.chunk.name = format!("{}::{}", name, method.name);
             
-            // Set class context for super keyword support
+            // set class context for super keyword
             method_compiler.current_class = Some(name.to_string());
             method_compiler.current_superclass = superclass.clone();
-            
-            // Set up parameters (including 'this' as local 0 for instance methods)
+
+            // set up parameters (including 'this' as local 0 for instance methods)
             if !method.is_static {
                 method_compiler.locals.insert("this".to_string(), 0);
                 method_compiler.local_count = 1;
@@ -35,36 +35,36 @@ impl Compiler {
                 method_compiler.local_count = local_idx + 1;
             }
             
-            // Compile method body
+            // compile method body
             for stmt in &method.body {
                 method_compiler.compile_stmt(stmt)?;
             }
-            
-            // Ensure method returns something
-            // For constructors, return 'this'. For regular methods, return null.
+
+            // ensure method returns something
+            // for constructors, return 'this'. for regular methods, return null.
             if method.name == "constructor" {
                 method_compiler.chunk.write(OpCode::GetLocal(0), 0); // Get 'this'
             } else {
                 method_compiler.chunk.write(OpCode::LoadNull, 0);
             }
             method_compiler.chunk.write(OpCode::Return, 0);
-            
-            // Create method value
+
+            // create method value
             let method_value = Value::Function {
                 name: method.name.clone(),
                 param_count: method.params.len(),
                 chunk: method_compiler.chunk,
             };
-            
-            // Store in appropriate map based on static flag
+
+            // store in appropriate map based on static flag
             if method.is_static {
                 static_method_map.insert(method.name.clone(), method_value);
             } else {
                 instance_method_map.insert(method.name.clone(), method_value);
             }
         }
-        
-        // Build field and method access maps
+
+        // build field and method access maps
         let mut field_access_map = HashMap::new();
         for field in fields {
             field_access_map.insert(field.name.clone(), field.access.clone());
@@ -74,8 +74,8 @@ impl Compiler {
         for method in methods {
             method_access_map.insert(method.name.clone(), method.access.clone());
         }
-        
-        // Store class with methods as a constant
+
+        // store class with methods as a constant
         let class_value = Value::Class {
             name: name.to_string(),
             superclass: None,
@@ -87,22 +87,22 @@ impl Compiler {
         
         let class_idx = self.chunk.add_constant(class_value);
         self.chunk.write(OpCode::LoadConst(class_idx), self.current_line);
-        
-        // Store class in global variable
+
+        // store class in global variable
         let name_idx = self.chunk.add_constant(Value::String(name.to_string()));
 
         self.chunk.write(OpCode::SetGlobal(name_idx), self.current_line);
-        
-        // Handle inheritance if there's a superclass
+
+        // handle inheritance if there's a superclass
         if let Some(super_name) = superclass {
-            // Load superclass
+            // load superclass
             self.compile_identifier(super_name)?;
             
-            // Load subclass name
+            // load subclass name
             let class_name_const = self.chunk.add_constant(Value::String(name.to_string()));
             self.chunk.write(OpCode::LoadConst(class_name_const), self.current_line);
-            
-            // Inherit from superclass
+
+            // inherit from superclass
             self.chunk.write(OpCode::Inherit, self.current_line);
         }
         

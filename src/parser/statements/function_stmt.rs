@@ -26,30 +26,12 @@ impl<'a> Parser<'a> {
         let mut params = Vec::new();
         if self.current.token != Token::RParen {
             loop {
-                let param_type = match &self.current.token {
-                    Token::NumKw => "num",
-                    Token::BoolKw => "bool",
-                    Token::StrKw => "str",
-                    Token::ListKw => "list",
-                    _ => "",
-                };
-                if param_type != "" {
-                    self.advance(); // skip type
-                    match &self.current.token {
-                        Token::Identifier(id) => {
-                            params.push(crate::parser::ast::Param { param_name: id.clone(), param_type: param_type.to_string() });
-                        }
-                        _ => errormsg::parser_error("Expected identifier after type in function parameters", self.current.line),
+                match &self.current.token {
+                    Token::Identifier(id) => {
+                        params.push(crate::parser::ast::Param { param_name: id.clone() });
+                        self.advance();
                     }
-                    self.advance();
-                } else {
-                    match &self.current.token {
-                        Token::Identifier(id) => {
-                            params.push(crate::parser::ast::Param { param_name: id.clone(), param_type: String::new() });
-                        }
-                        _ => errormsg::parser_error("Expected identifier in function parameters", self.current.line),
-                    }
-                    self.advance();
+                    _ => errormsg::parser_error("Expected identifier in function parameters", self.current.line),
                 }
 
                 if self.current.token == Token::Comma {

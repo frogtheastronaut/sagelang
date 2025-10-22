@@ -3,16 +3,14 @@ use super::chunk::Chunk;
 use super::opcode::OpCode;
 use std::collections::HashMap;
 
-// call frame for function calls
 #[derive(Debug, Clone)]
 pub struct CallFrame {
     pub chunk: Chunk,
     pub ip: usize,
     pub stack_offset: usize,
-    pub class_context: Option<String>, // Current class name if executing in a method
+    pub class_context: Option<String>,
 }
 
-/// virtual Machine for executing bytecode
 pub struct VM {
     pub stack: Vec<Value>,
     pub frames: Vec<CallFrame>,
@@ -70,7 +68,6 @@ impl VM {
             let ip = self.frames[frame_idx].ip;
             
             if ip >= self.frames[frame_idx].chunk.code.len() {
-                // end of chunk
                 self.frames.pop();
                 if self.frames.is_empty() {
                     return Ok(());
@@ -137,7 +134,6 @@ impl VM {
                     if stack_offset + idx < self.stack.len() {
                         self.stack[stack_offset + idx] = value;
                     } else {
-                        // wxtend stack if necessary
                         while self.stack.len() <= stack_offset + idx {
                             self.stack.push(Value::Null);
                         }
@@ -155,7 +151,6 @@ impl VM {
                         (Value::String(x), Value::String(y)) => {
                             self.stack.push(Value::String(format!("{}{}", x, y)));
                         }
-                        // String concatenation with type coercion
                         (Value::String(x), _) => {
                             let b_str = match &b {
                                 Value::Number(n) => n.to_string(),
@@ -318,37 +313,28 @@ impl VM {
                 }
                 
                 OpCode::Call(arg_count) => {
-                    // stack layout: [..., func, arg1, arg2, ...argN]
-                    // tshe function is at position: stack.len() - arg_count - 1
                     let func_index = self.stack.len() - arg_count - 1;
                     let function = self.stack[func_index].clone();
                     
                     match function {
                         Value::Function { name: _, param_count, chunk } => {
-                            // verify argument count
                             if arg_count != param_count {
                                 return Err(self.runtime_error(&format!("Expected {} arguments but got {}", param_count, arg_count)));
                             }
                             
-                            // remove the function from the stack, keeping arguments
-                            // stack layout after: [..., arg1, arg2, ...argN]
                             self.stack.remove(func_index);
-                            
-                            // set up call frame with arguments on stack
-                            // stack_offset points to where arg1 now is
                             let stack_offset = self.stack.len() - arg_count;
                             
                             let new_frame = CallFrame {
                                 chunk,
                                 ip: 0,
                                 stack_offset,
-                                class_context: None, // Regular function call
+                                class_context: None,
                             };
                             
                             self.frames.push(new_frame);
                         }
                         Value::Class { name, methods, field_access, method_access, static_methods, .. } => {
-                            // Calling a class creates an instance
                             use std::rc::Rc;
                             use std::cell::RefCell;
                             
@@ -361,53 +347,40 @@ impl VM {
                                 static_methods: static_methods.clone(),
                             };
                             
-                            // Remove class from stack
                             self.stack.remove(func_index);
                             
-                            // Check if there's a constructor method
                             if let Some(constructor) = methods.get("constructor") {
-                                // Insert instance at the beginning of arguments for 'this'
-                                // Arguments are at: stack[stack.len() - arg_count .. stack.len()]
-                                // We need 'this' to be at local 0
                                 let args_start = self.stack.len() - arg_count;
                                 self.stack.insert(args_start, instance.clone());
                                 
-                                // Call constructor
                                 if let Value::Function { param_count, chunk, .. } = constructor {
                                     if arg_count != *param_count {
                                         return Err(self.runtime_error(&format!("Expected {} arguments but got {}", param_count, arg_count)));
                                     }
                                     
-                                    let stack_offset = args_start; // 'this' is now at args_start
+                                    let stack_offset = args_start;
                                     let new_frame = CallFrame {
                                         chunk: chunk.clone(),
                                         ip: 0,
                                         stack_offset,
-                                        class_context: Some(name.clone()), // Constructor runs in class context
+                                        class_context: Some(name.clone()),
                                     };
                                     self.frames.push(new_frame);
                                 }
                             } else {
-                                // No constructor, just push the instance
                                 self.stack.push(instance);
                             }
                         }
                         Value::BoundMethod { receiver, method } => {
-                            // Calling a bound method
-                            // Extract class name from receiver
                             let class_name = if let Value::Instance { class_name, .. } = &*receiver {
                                 Some(class_name.clone())
                             } else {
                                 None
                             };
                             
-                            // Remove the bound method from stack
                             self.stack.remove(func_index);
-                            
-                            // Push receiver ('this')
                             self.stack.insert(self.stack.len() - arg_count, *receiver);
                             
-                            // Call the method
                             if let Value::Function { param_count, chunk, .. } = *method {
                                 if arg_count != param_count {
                                     return Err(self.runtime_error(&format!("Expected {} arguments but got {}", param_count, arg_count)));
@@ -418,7 +391,7 @@ impl VM {
                                     chunk,
                                     ip: 0,
                                     stack_offset,
-                                    class_context: class_name, // Method runs in class context
+                                    class_context: class_name,
                                 };
                                 self.frames.push(new_frame);
                             } else {
@@ -431,14 +404,8 @@ impl VM {
                 
                 OpCode::Return => {
                     let return_value = self.stack.pop().unwrap_or(Value::Null);
-                    
-                    // pop the current frame
                     let frame = self.frames.pop().ok_or("Frame stack underflow")?;
-                    
-                    // clean up the stack to the point before the function call
                     self.stack.truncate(frame.stack_offset);
-                    
-                    // push the return value
                     self.stack.push(return_value);
                 }
                 
@@ -484,8 +451,6 @@ impl VM {
                 }
                 
                 OpCode::DefineClass(_name_idx) => {
-                    // Class is already on top of stack from compilation
-                    // Just pop it (it's already stored in globals)
                     self.stack.pop();
                 }
                 
@@ -500,59 +465,44 @@ impl VM {
                     
                     match instance {
                         Value::Instance { fields, methods, field_access, method_access, class_name, .. } => {
-                            // Get current execution context
                             let current_context = self.frames.last().and_then(|f| f.class_context.clone());
                             
-                            // Check fields first
                             if let Some(field_value) = fields.borrow().get(&prop_name) {
-                                // Check field access level
                                 if let Some(access) = field_access.get(&prop_name) {
                                     use crate::parser::ast::AccessModifier;
                                     match access {
                                         AccessModifier::Private => {
-                                            // Private: only accessible within same class
                                             if current_context.as_ref() != Some(&class_name) {
                                                 return Err(self.runtime_error(&format!("Cannot access private field '{}' from outside class", prop_name)));
                                             }
                                         }
                                         AccessModifier::Protected => {
-                                            // Protected: accessible within class and subclasses
-                                            // For now, just check if we're in any class context
                                             if current_context.is_none() {
                                                 return Err(self.runtime_error(&format!("Cannot access protected field '{}' from outside class hierarchy", prop_name)));
                                             }
                                         }
-                                        AccessModifier::Public => {
-                                            // Public: accessible from anywhere
-                                        }
+                                        AccessModifier::Public => {}
                                     }
                                 }
                                 self.stack.push(field_value.clone());
                             }
-                            // Then check methods
                             else if let Some(method) = methods.get(&prop_name) {
-                                // Check method access level
                                 if let Some(access) = method_access.get(&prop_name) {
                                     use crate::parser::ast::AccessModifier;
                                     match access {
                                         AccessModifier::Private => {
-                                            // Private: only accessible within same class
                                             if current_context.as_ref() != Some(&class_name) {
                                                 return Err(self.runtime_error(&format!("Cannot access private method '{}' from outside class", prop_name)));
                                             }
                                         }
                                         AccessModifier::Protected => {
-                                            // Protected: accessible within class and subclasses
                                             if current_context.is_none() {
                                                 return Err(self.runtime_error(&format!("Cannot access protected method '{}' from outside class hierarchy", prop_name)));
                                             }
                                         }
-                                        AccessModifier::Public => {
-                                            // Public: accessible from anywhere
-                                        }
+                                        AccessModifier::Public => {}
                                     }
                                 }
-                                // Bind the method to this instance
                                 self.stack.push(Value::BoundMethod {
                                     receiver: Box::new(Value::Instance {
                                         class_name: "".to_string(),
@@ -569,9 +519,7 @@ impl VM {
                             }
                         }
                         Value::Class { static_methods, .. } => {
-                            // Accessing class property - check for static methods
                             if let Some(static_method) = static_methods.get(&prop_name) {
-                                // Static methods are not bound - they're just regular functions
                                 self.stack.push(static_method.clone());
                             } else {
                                 return Err(self.runtime_error(&format!("Undefined static method '{}'", prop_name)));
@@ -593,27 +541,26 @@ impl VM {
                     
                     match instance {
                         Value::Instance { fields, field_access, class_name, .. } => {
-                            // Get current execution context
                             let current_context = self.frames.last().and_then(|f| f.class_context.clone());
                             
-                            // Check field access level before setting
                             if let Some(access) = field_access.get(&prop_name) {
                                 use crate::parser::ast::AccessModifier;
                                 match access {
                                     AccessModifier::Private => {
-                                        // Private: only accessible within same class
+                                        // private: only accessible within same class
                                         if current_context.as_ref() != Some(&class_name) {
                                             return Err(self.runtime_error(&format!("Cannot set private field '{}' from outside class", prop_name)));
                                         }
                                     }
                                     AccessModifier::Protected => {
-                                        // Protected: accessible within class and subclasses
+                                        // protected: accessible within class and subclasses
                                         if current_context.is_none() {
                                             return Err(self.runtime_error(&format!("Cannot set protected field '{}' from outside class hierarchy", prop_name)));
                                         }
                                     }
                                     AccessModifier::Public => {
-                                        // Public: accessible from anywhere
+                                        // public: accessible from anywhere
+                                        // don't do anything here
                                     }
                                 }
                             }
@@ -625,7 +572,6 @@ impl VM {
                 }
                 
                 OpCode::GetSuper(name_idx) => {
-                    // Get the method name
                     let name_value = self.frames[frame_idx].chunk.constants.get(name_idx).ok_or("Invalid constant index")?;
                     let method_name = if let Value::String(n) = name_value {
                         n.clone()
@@ -633,17 +579,12 @@ impl VM {
                         return Err(self.runtime_error("Method name must be a string"));
                     };
                     
-                    // Get the superclass from stack
                     let superclass = self.stack.pop().ok_or("Stack underflow")?;
-                    
-                    // Get the instance (this)
                     let instance = self.stack.pop().ok_or("Stack underflow")?;
                     
-                    // Look up method in superclass
                     match superclass {
                         Value::Class { methods, .. } => {
                             if let Some(method) = methods.get(&method_name) {
-                                // Bind the method to the instance
                                 if let Value::Instance { class_name, fields, field_access, methods: inst_methods, method_access, static_methods } = instance {
                                     self.stack.push(Value::BoundMethod {
                                         receiver: Box::new(Value::Instance {
@@ -678,22 +619,19 @@ impl VM {
                     };
                     
                     if let Value::Class { methods: super_methods, field_access: super_field_access, method_access: super_method_access, static_methods: super_static_methods, .. } = superclass {
-                        // Get subclass from globals
                         if let Some(Value::Class { name, superclass: _, methods: subclass_methods, field_access: subclass_field_access, method_access: subclass_method_access, static_methods: subclass_static_methods }) = self.globals.get(&subclass_name).cloned() {
-                            // Merge: start with superclass methods, then add/override with subclass methods
                             let mut merged_methods = super_methods.clone();
-                            // Subclass methods override superclass methods with same name
                             for (method_name, method_value) in subclass_methods {
                                 merged_methods.insert(method_name, method_value);
                             }
                             
-                            // Merge static methods
+                            // merge static methods
                             let mut merged_static_methods = super_static_methods.clone();
                             for (method_name, method_value) in subclass_static_methods {
                                 merged_static_methods.insert(method_name, method_value);
                             }
                             
-                            // Merge access modifiers (subclass overrides)
+                            // merge access modifiers
                             let mut merged_field_access = super_field_access.clone();
                             for (field_name, access) in subclass_field_access {
                                 merged_field_access.insert(field_name, access);
