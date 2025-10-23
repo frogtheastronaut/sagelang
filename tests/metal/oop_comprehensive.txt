@@ -1,0 +1,82 @@
+// Test: Complex OOP scenario on GPU
+// Tests: multiple inheritance levels, method overriding, mixed access modifiers
+
+print "=== OOP: Comprehensive Test on GPU ===";
+
+use_metal {
+    class Vehicle {
+        protected speed;
+        public brand;
+        
+        function constructor(b) {
+            this.brand = b;
+            this.speed = 0;
+        }
+        
+        public function accelerate(amount) {
+            this.speed = this.speed + amount;
+            print "Speed increased to:";
+            print this.speed;
+        }
+        
+        public function get_speed() {
+            return this.speed;
+        }
+    }
+    
+    class Car < Vehicle {
+        private num_doors;
+        
+        function constructor(b, doors) {
+            this.brand = b;
+            this.speed = 0;
+            this.num_doors = doors;
+        }
+        
+        public function honk() {
+            print "Beep beep!";
+        }
+        
+        public function info() {
+            print "Brand:";
+            print this.brand;
+            print "Doors:";
+            print this.num_doors;
+            print "Speed:";
+            print this.get_speed();
+        }
+    }
+    
+    class SportsCar < Car {
+        private turbo_enabled;
+        
+        function constructor(b, doors) {
+            this.brand = b;
+            this.speed = 0;
+            this.num_doors = doors;
+            this.turbo_enabled = false;
+        }
+        
+        public function enable_turbo() {
+            this.turbo_enabled = true;
+            print "TURBO ENABLED!";
+        }
+        
+        public function accelerate(amount) {
+            if (this.turbo_enabled) {
+                super.accelerate(amount * 2);
+            } else {
+                super.accelerate(amount);
+            }
+        }
+    }
+    
+    let sports_car = new SportsCar("Ferrari", 2);
+    sports_car.honk();
+    sports_car.accelerate(50);
+    sports_car.enable_turbo();
+    sports_car.accelerate(50);
+    sports_car.info();
+}
+
+print "Comprehensive OOP test complete!";

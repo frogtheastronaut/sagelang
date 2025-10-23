@@ -16,6 +16,7 @@ pub struct VM {
     pub frames: Vec<CallFrame>,
     pub globals: HashMap<String, Value>,
     pub debug: bool,
+    pub gpu_state: crate::gpu::GpuState,
 }
 
 impl VM {
@@ -25,6 +26,7 @@ impl VM {
             frames: Vec::new(),
             globals: HashMap::new(),
             debug: false,
+            gpu_state: crate::gpu::GpuState::new(),
         }
     }
     
@@ -677,6 +679,28 @@ impl VM {
                 OpCode::Dup => {
                     let value = self.stack.last().cloned().ok_or("Stack underflow")?;
                     self.stack.push(value);
+                }
+                
+                OpCode::MetalInit => {
+                    if let Err(e) = self.gpu_state.init() {
+                        if self.debug {
+                            eprintln!("[DEBUG] Metal initialization failed: {}", e);
+                            eprintln!("[DEBUG] Falling back to CPU execution");
+                        }
+                        // Continue execution on CPU instead of failing
+                        self.gpu_state.initialized = false;
+                    }
+                }
+                
+                OpCode::MetalLoadKernel(idx) => {
+                    let kernel_value = self.frames[frame_idx].chunk.constants.get(idx)
+                        .ok_or("Invalid kernel constant index")?;
+                    
+                    if let Value::String(kernel_code) = kernel_value {
+                        self.gpu_state.load_kernel(kernel_code.clone());
+                    } else {
+                        return Err(self.runtime_error("Metal kernel must be a string"));
+                    }
                 }
             }
         }

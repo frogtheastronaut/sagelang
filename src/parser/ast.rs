@@ -143,6 +143,11 @@ pub enum Stmt {
         methods: Vec<Method>,
         line: usize,
     },
+    UseMetal {
+        kernel_code: String,
+        body: Vec<Stmt>,
+        line: usize,
+    },
 }
 
 #[derive(Debug, Clone)]
@@ -189,6 +194,7 @@ impl Stmt {
             Stmt::ExprStmt { line, .. } => *line,
             Stmt::Block { line, .. } => *line,
             Stmt::Class { line, .. } => *line,
+            Stmt::UseMetal { line, .. } => *line,
         }
     }
 }

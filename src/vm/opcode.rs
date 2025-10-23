@@ -51,6 +51,10 @@ pub enum OpCode {
     GetSuper(usize),        // get method from superclass (name index)
     Inherit,                // set up inheritance
 
+    // GPU/Metal operations
+    MetalInit,              // initialize Metal GPU context
+    MetalLoadKernel(usize), // load Metal kernel from constant pool (index)
+    
     // Other
     Pop,                    // pop and discard top of stack
     Print,                  // print top of stack

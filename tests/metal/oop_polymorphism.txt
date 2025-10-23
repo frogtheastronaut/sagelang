@@ -1,0 +1,50 @@
+// Test: Polymorphism on GPU
+// Tests OOP: method overriding, polymorphic behavior
+
+print "=== OOP: Polymorphism on GPU ===";
+
+use_metal {
+    class Shape {
+        function area() {
+            print "Shape area not implemented";
+            return 0;
+        }
+    }
+    
+    class Rectangle < Shape {
+        public width;
+        public height;
+        
+        function constructor(w, h) {
+            this.width = w;
+            this.height = h;
+        }
+        
+        function area() {
+            return this.width * this.height;
+        }
+    }
+    
+    class Circle < Shape {
+        public radius;
+        
+        function constructor(r) {
+            this.radius = r;
+        }
+        
+        function area() {
+            return 3.14159 * this.radius * this.radius;
+        }
+    }
+    
+    let rect = new Rectangle(10, 5);
+    let circle = new Circle(7);
+    
+    print "Rectangle area:";
+    print rect.area();
+    
+    print "Circle area:";
+    print circle.area();
+}
+
+print "Polymorphism test complete!";

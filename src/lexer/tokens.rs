@@ -49,10 +49,6 @@ pub enum Token {
     Else,
     ElseIfKw,
     Return,
-    NumKw,    // num keyword
-    BoolKw,   // bool keyword
-    ListKw,   // list keyword
-    StrKw,    // str keyword
     WhileKw,  // while keyword
     ForKw,    // for keyword
     InKw,     // in keyword
@@ -67,6 +63,7 @@ pub enum Token {
     PublicKw,  // public keyword
     ProtectedKw, // protected keyword
     NewKw,    // new keyword
+    UseMetalKw, // use_metal keyword
 
     // other
     Comma, // ,
@@ -124,10 +121,6 @@ pub fn keywords() -> HashMap<&'static str, Token> {
     map.insert("else", Token::Else);
     map.insert("elseif", Token::ElseIfKw);
     map.insert("return", Token::Return);
-    map.insert("num", Token::NumKw);
-    map.insert("bool", Token::BoolKw);
-    map.insert("list", Token::ListKw);
-    map.insert("str", Token::StrKw);
     map.insert("while", Token::WhileKw);
     map.insert("for", Token::ForKw);
     map.insert("in", Token::InKw);
@@ -142,5 +135,6 @@ pub fn keywords() -> HashMap<&'static str, Token> {
     map.insert("public", Token::PublicKw);
     map.insert("protected", Token::ProtectedKw);
     map.insert("new", Token::NewKw);
+    map.insert("use_metal", Token::UseMetalKw);
     map
 }

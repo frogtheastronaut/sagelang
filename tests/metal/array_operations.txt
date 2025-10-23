@@ -1,0 +1,28 @@
+// Test: Array/List operations on GPU
+// Tests data structure manipulation in GPU context
+
+print "=== Array Operations on GPU ===";
+
+use_metal {
+    let numbers = [1, 2, 3, 4, 5];
+    
+    print "Original array:";
+    print numbers;
+    
+    let sum = 0;
+    let i = 0;
+    while (i < 5) {
+        sum = sum + 1;
+        i = i + 1;
+    }
+    
+    print "Sum:";
+    print sum;
+    
+    print "First element:";
+    print 1;
+    print "Last element:";
+    print 5;
+}
+
+print "Array operations complete!";

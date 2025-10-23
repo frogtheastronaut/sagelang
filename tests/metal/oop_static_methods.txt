@@ -1,0 +1,34 @@
+// Test: Static methods on GPU
+// Tests OOP: static methods that don't require instances
+
+print "=== OOP: Static Methods on GPU ===";
+
+use_metal {
+    class MathUtils {
+        static function add(a, b) {
+            return a + b;
+        }
+        
+        static function multiply(a, b) {
+            return a * b;
+        }
+        
+        static function factorial(n) {
+            if (n <= 1) {
+                return 1;
+            }
+            return n * MathUtils.factorial(n - 1);
+        }
+    }
+    
+    print "5 + 3 =";
+    print MathUtils.add(5, 3);
+    
+    print "4 * 7 =";
+    print MathUtils.multiply(4, 7);
+    
+    print "5! =";
+    print MathUtils.factorial(5);
+}
+
+print "Static methods test complete!";

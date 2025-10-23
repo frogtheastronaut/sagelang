@@ -1,0 +1,30 @@
+// Test: Basic class definition and instantiation on GPU
+// Tests OOP basics: classes, constructors, fields
+
+print "=== OOP: Basic Class on GPU ===";
+
+use_metal {
+    class Point {
+        public x;
+        public y;
+        
+        function constructor(x_val, y_val) {
+            this.x = x_val;
+            this.y = y_val;
+        }
+        
+        function display() {
+            print "Point:";
+            print this.x;
+            print this.y;
+        }
+    }
+    
+    let p1 = new Point(5, 10);
+    p1.display();
+    
+    let p2 = new Point(15, 20);
+    p2.display();
+}
+
+print "Basic class test complete!";

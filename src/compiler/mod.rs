@@ -52,6 +52,7 @@ impl Compiler {
             Stmt::Function { name, params, body, .. } => self.compile_function_stmt(name, params, body),
             Stmt::Return { value: expr, .. } => self.compile_return_stmt(expr),
             Stmt::Class { name, superclass, fields, methods, .. } => self.compile_class_stmt(name, superclass, fields, methods),
+            Stmt::UseMetal { kernel_code, body, .. } => self.compile_use_metal(kernel_code, body),
         }
     }
     

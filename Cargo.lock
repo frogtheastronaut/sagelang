@@ -3,6 +3,15 @@
 version = 4
 
 [[package]]
+name = "cc"
+version = "1.2.41"
+source = "git+https://github.com/rust-lang/cc-rs#cda8b386d419f3adb0c15b729af5504201689aa1"
+dependencies = [
+ "find-msvc-tools",
+ "shlex",
+]
+
+[[package]]
 name = "colored"
 version = "3.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -12,11 +21,23 @@ dependencies = [
 ]
 
 [[package]]
+name = "find-msvc-tools"
+version = "0.1.4"
+source = "git+https://github.com/rust-lang/cc-rs#cda8b386d419f3adb0c15b729af5504201689aa1"
+
+[[package]]
 name = "sagelang"
 version = "0.1.0"
 dependencies = [
+ "cc",
  "colored",
 ]
+
+[[package]]
+name = "shlex"
+version = "1.3.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "0fda2ff0d084019ba4d7c6f371c95d8fd75ce3524c3cb8fb653a3023f6323e64"
 
 [[package]]
 name = "windows-sys"

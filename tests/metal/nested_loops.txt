@@ -1,0 +1,25 @@
+// Test: Nested loops and complex control flow on GPU
+// Tests nested iterations and multiple conditionals
+
+print "=== Nested Loops on GPU ===";
+
+use_metal {
+    print "Multiplication table:";
+    for (i in 1 .. 5) {
+        for (j in 1 .. 5) {
+            let product = i * j;
+            print product;
+        }
+        print "---";
+    }
+    
+    print "Pattern generation:";
+    for (row in 1 .. 5) {
+        for (col in 1 .. row) {
+            print "*";
+        }
+        print "";
+    }
+}
+
+print "Nested loops test complete!";

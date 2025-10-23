@@ -1,0 +1,44 @@
+// Test: Inheritance on GPU
+// Tests OOP: inheritance, super keyword, method overriding
+
+print "=== OOP: Inheritance on GPU ===";
+
+use_metal {
+    class Animal {
+        public name;
+        
+        function constructor(n) {
+            this.name = n;
+        }
+        
+        function speak() {
+            print "Animal speaks";
+        }
+    }
+    
+    class Dog < Animal {
+        public breed;
+        
+        function constructor(n, b) {
+            this.name = n;
+            this.breed = b;
+        }
+        
+        function speak() {
+            print "Dog barks: Woof!";
+        }
+        
+        function display() {
+            print "Name:";
+            print this.name;
+            print "Breed:";
+            print this.breed;
+        }
+    }
+    
+    let dog = new Dog("Buddy", "Golden Retriever");
+    dog.speak();
+    dog.display();
+}
+
+print "Inheritance test complete!";

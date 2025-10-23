@@ -66,8 +66,7 @@ impl<'a> Parser<'a> {
                     self.advance();
                     name
                 }
-                Token::PrintKw | Token::Return | Token::StrKw | Token::NumKw | 
-                Token::BoolKw | Token::ListKw | Token::StaticKw | Token::If | 
+                Token::PrintKw | Token::Return | Token::StaticKw | Token::If | 
                 Token::Else | Token::ElseIfKw | Token::WhileKw | Token::ForKw |
                 Token::Let | Token::Fn | Token::InKw | Token::ClassKw | 
                 Token::ThisKw | Token::SuperKw | Token::NewKw | Token::PrivateKw |

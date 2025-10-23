@@ -193,6 +193,14 @@ impl Chunk {
                 println!("Dup");
                 offset + 1
             }
+            OpCode::MetalInit => {
+                println!("MetalInit");
+                offset + 1
+            }
+            OpCode::MetalLoadKernel(idx) => {
+                println!("MetalLoadKernel {}", idx);
+                offset + 1
+            }
         }
     }
 }

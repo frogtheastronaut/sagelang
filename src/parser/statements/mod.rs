@@ -7,6 +7,7 @@ pub mod while_stmt;
 pub mod for_stmt;
 pub mod print_stmt;
 pub mod class_stmt;
+pub mod use_metal_stmt;
 
 use crate::parser::Parser;
 use crate::parser::ast::Stmt;
@@ -31,6 +32,7 @@ impl<'a> Parser<'a> {
                 self.advance();
                 self.class_declaration()
             }
+            Token::UseMetalKw => self.use_metal_stmt(),
             Token::Identifier(_) | Token::ThisKw => {
                 // Parse the left side as an expression
                 let expr = self.call();

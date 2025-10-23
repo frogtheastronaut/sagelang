@@ -1,0 +1,20 @@
+// Test: FizzBuzz on GPU
+// Tests loops and conditionals inside use_metal
+
+print "=== FizzBuzz on GPU ===";
+
+use_metal {
+    for (i in 1 .. 20) {
+        if (i % 15 == 0) {
+            print "FizzBuzz";
+        } elseif (i % 3 == 0) {
+            print "Fizz";
+        } elseif (i % 5 == 0) {
+            print "Buzz";
+        } else {
+            print i;
+        }
+    }
+}
+
+print "FizzBuzz test complete!";

@@ -1,0 +1,49 @@
+// Test: Encapsulation with access modifiers on GPU
+// Tests OOP: private, protected, public fields and methods
+
+print "=== OOP: Encapsulation on GPU ===";
+
+use_metal {
+    class BankAccount {
+        private balance;
+        public owner;
+        
+        function constructor(name, initial_balance) {
+            this.owner = name;
+            this.balance = initial_balance;
+        }
+        
+        public function deposit(amount) {
+            this.balance = this.balance + amount;
+            print "Deposited:";
+            print amount;
+        }
+        
+        public function withdraw(amount) {
+            if (this.balance >= amount) {
+                this.balance = this.balance - amount;
+                print "Withdrawn:";
+                print amount;
+            } else {
+                print "Insufficient funds";
+            }
+        }
+        
+        public function get_balance() {
+            return this.balance;
+        }
+    }
+    
+    let account = new BankAccount("Alice", 1000);
+    print "Owner:";
+    print account.owner;
+    
+    account.deposit(500);
+    account.withdraw(300);
+    
+    let bal = account.get_balance();
+    print "Final balance:";
+    print bal;
+}
+
+print "Encapsulation test complete!";

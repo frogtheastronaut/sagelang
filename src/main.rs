@@ -4,6 +4,7 @@ mod interpreter;
 mod compiler;
 mod vm;
 mod error;
+mod gpu;
 
 use std::fs;
 use std::env;
