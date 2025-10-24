@@ -1,7 +1,5 @@
-// bytecode instructions
 #[derive(Debug, Clone, PartialEq)]
 pub enum OpCode {
-    // variables
     LoadConst(usize),       // load constant from constant pool
     LoadTrue,               // load boolean true
     LoadFalse,              // load boolean false
@@ -54,6 +52,11 @@ pub enum OpCode {
     // GPU/Metal operations
     MetalInit,              // initialize Metal GPU context
     MetalLoadKernel(usize), // load Metal kernel from constant pool (index)
+    MetalExecute,           // execute Metal kernel with top of stack as input
+    
+    CudaInit,               // initialize CUDA GPU context
+    CudaLoadKernel(usize),  // load CUDA kernel from constant pool (index)
+    CudaExecute,            // execute CUDA kernel with top of stack as input
     
     // Other
     Pop,                    // pop and discard top of stack

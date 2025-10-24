@@ -64,6 +64,7 @@ pub enum Token {
     ProtectedKw, // protected keyword
     NewKw,    // new keyword
     UseMetalKw, // use_metal keyword
+    UseCudaKw, // use_cuda keyword
 
     // other
     Comma, // ,
@@ -136,5 +137,6 @@ pub fn keywords() -> HashMap<&'static str, Token> {
     map.insert("protected", Token::ProtectedKw);
     map.insert("new", Token::NewKw);
     map.insert("use_metal", Token::UseMetalKw);
+    map.insert("use_cuda", Token::UseCudaKw);
     map
 }

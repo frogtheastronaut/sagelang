@@ -1,0 +1,19 @@
+// Test: Simple GPU computation
+// Multiplies each element by 2 on the GPU
+
+print "=== Simple GPU Test ===";
+
+use_metal {
+    "
+    #include <metal_stdlib>
+    using namespace metal;
+    
+    kernel void compute_kernel(device float* input [[buffer(0)]],
+                               device float* output [[buffer(1)]],
+                               uint id [[thread_position_in_grid]]) {
+        output[id] = input[id] * 2.0;
+    }
+    ";
+}
+
+print "GPU test complete!";

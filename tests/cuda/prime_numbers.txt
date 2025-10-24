@@ -1,0 +1,38 @@
+// Test: Prime number checking on CUDA
+// Tests mathematical operations and conditionals
+
+print "=== Prime Number Checker on CUDA ===";
+
+use_cuda {
+    function is_prime(n) {
+        if (n <= 1) {
+            return false;
+        }
+        if (n <= 3) {
+            return true;
+        }
+        if (n % 2 == 0) {
+            return false;
+        }
+        
+        let i = 3;
+        while (i * i <= n) {
+            if (n % i == 0) {
+                return false;
+            }
+            i = i + 2;
+        }
+        return true;
+    }
+    
+    print "Checking primes from 1 to 30:";
+    let num = 1;
+    while (num <= 30) {
+        if (is_prime(num)) {
+            print num;
+        }
+        num = num + 1;
+    }
+}
+
+print "Prime check complete!";

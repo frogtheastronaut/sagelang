@@ -148,6 +148,11 @@ pub enum Stmt {
         body: Vec<Stmt>,
         line: usize,
     },
+    UseCuda {
+        kernel_code: String,
+        body: Vec<Stmt>,
+        line: usize,
+    },
 }
 
 #[derive(Debug, Clone)]
@@ -195,6 +200,7 @@ impl Stmt {
             Stmt::Block { line, .. } => *line,
             Stmt::Class { line, .. } => *line,
             Stmt::UseMetal { line, .. } => *line,
+            Stmt::UseCuda { line, .. } => *line,
         }
     }
 }

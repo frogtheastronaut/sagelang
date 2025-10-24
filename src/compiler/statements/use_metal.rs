@@ -2,7 +2,6 @@ use crate::compiler::Compiler;
 use crate::parser::ast::{Stmt, Expr};
 use crate::vm::OpCode;
 use crate::interpreter::Value;
-use crate::lexer::tokens::Token;
 
 impl Compiler {
     pub fn compile_use_metal(&mut self, kernel_code: &str, body: &[Stmt]) -> Result<(), String> {
@@ -17,7 +16,7 @@ impl Compiler {
             let metal_code = self.generate_metal_from_sage(body)?;
             
             // Print generated Metal code in debug mode
-            if self.chunk.name == "main" {
+            if self.debug {
                 println!("\n[Generated Metal Kernel]:");
                 println!("{}", metal_code);
                 println!();
@@ -28,6 +27,9 @@ impl Compiler {
             let kernel_idx = self.chunk.constants.len();
             self.chunk.constants.push(Value::String(metal_code));
             self.chunk.write(OpCode::MetalLoadKernel(kernel_idx), self.current_line);
+            
+            // Execute kernel on GPU
+            self.chunk.write(OpCode::MetalExecute, self.current_line);
         }
         
         // Execute the body normally - code inside use_metal runs like regular Sage code
@@ -56,13 +58,13 @@ impl Compiler {
         for stmt in body {
             match stmt {
                 Stmt::VarDecl { name, value, .. } => {
-                    if let Some(op) = self.extract_operation(value) {
+                    if let Some(op) = self.gpu_extract_operation(value, "input[id]") {
                         metal.push_str(&format!("    float {} = {};\n", name, op));
                         metal_vars.insert(name.clone(), op);
                     }
                 }
                 Stmt::Assign { name, value, .. } => {
-                    if let Some(op) = self.extract_operation(value) {
+                    if let Some(op) = self.gpu_extract_operation(value, "input[id]") {
                         metal.push_str(&format!("    {} = {};\n", name, op));
                         metal_vars.insert(name.clone(), op);
                     }
@@ -73,7 +75,7 @@ impl Compiler {
                         if metal_vars.contains_key(name) {
                             metal.push_str(&format!("    output[id] = {};\n", name));
                         }
-                    } else if let Some(op) = self.extract_operation(expr) {
+                    } else if let Some(op) = self.gpu_extract_operation(expr, "input[id]") {
                         metal.push_str(&format!("    output[id] = {};\n", op));
                     }
                 }
@@ -81,53 +83,13 @@ impl Compiler {
             }
         }
         
+        // Add thread ID to output to prove GPU execution
+        metal.push_str("    // Store thread ID to prove GPU execution\n");
+        metal.push_str("    if (id == 0) {\n");
+        metal.push_str("        output[0] = 999999.0; // Marker for thread 0\n");
+        metal.push_str("    }\n");
+        
         metal.push_str("}\n");
         Ok(metal)
-    }
-    
-    fn extract_operation(&self, expr: &Expr) -> Option<String> {
-        match expr {
-            Expr::BinaryOp { left, op, right, .. } => {
-                let left_str = self.expr_to_metal(left)?;
-                let right_str = self.expr_to_metal(right)?;
-                let op_str = match op {
-                    Token::Plus => "+",
-                    Token::Minus => "-",
-                    Token::Star => "*",
-                    Token::Slash => "/",
-                    Token::Percent => "%",
-                    _ => return None,
-                };
-                Some(format!("{} {} {}", left_str, op_str, right_str))
-            }
-            _ => self.expr_to_metal(expr),
-        }
-    }
-    
-    fn expr_to_metal(&self, expr: &Expr) -> Option<String> {
-        match expr {
-            Expr::Number { value, .. } => Some(format!("{}", value)),
-            Expr::Identifier { name, .. } => {
-                if name == "data" || name.starts_with("data") {
-                    Some("input[id]".to_string())
-                } else {
-                    Some(name.clone())
-                }
-            }
-            Expr::BinaryOp { left, op, right, .. } => {
-                let left_str = self.expr_to_metal(left)?;
-                let right_str = self.expr_to_metal(right)?;
-                let op_str = match op {
-                    Token::Plus => "+",
-                    Token::Minus => "-",
-                    Token::Star => "*",
-                    Token::Slash => "/",
-                    Token::Percent => "%",
-                    _ => return None,
-                };
-                Some(format!("({} {} {})", left_str, op_str, right_str))
-            }
-            _ => None,
-        }
     }
 }

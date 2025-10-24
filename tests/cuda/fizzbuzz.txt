@@ -1,0 +1,22 @@
+// Test: FizzBuzz on GPU (CUDA)
+// Tests loops and conditionals inside use_cuda
+
+print "=== FizzBuzz on CUDA ===";
+
+use_cuda {
+    let i = 1;
+    while (i <= 20) {
+        if (i % 15 == 0) {
+            print "FizzBuzz";
+        } elseif (i % 3 == 0) {
+            print "Fizz";
+        } elseif (i % 5 == 0) {
+            print "Buzz";
+        } else {
+            print i;
+        }
+        i = i + 1;
+    }
+}
+
+print "FizzBuzz test complete!";

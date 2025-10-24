@@ -1,12 +1,13 @@
 use crate::interpreter::Value;
 use super::opcode::OpCode;
+use std::fs::File;
+use std::io::Write;
 
-// a chunk of bytecode with its associated constant pool
 #[derive(Debug, Clone)]
 pub struct Chunk {
     pub code: Vec<OpCode>,
     pub constants: Vec<Value>,
-    pub lines: Vec<usize>,  // line numbers corresponding to each opcode
+    pub lines: Vec<usize>,
     pub name: String,
 }
 
@@ -20,185 +21,204 @@ impl Chunk {
         }
     }
     
-    // add an instruction to the chunk
     pub fn write(&mut self, op: OpCode, line: usize) {
         self.code.push(op);
         self.lines.push(line);
     }
     
-    // add a constant to the constant pool and return its index
     pub fn add_constant(&mut self, value: Value) -> usize {
         self.constants.push(value);
         self.constants.len() - 1
     }
     
-    // disassemble the chunk (for debugging)
     pub fn disassemble(&self) {
-        println!("== {} ==", self.name);
+        let mut output = String::new();
+        output.push_str(&format!("== {} ==\n", self.name));
         let mut offset = 0;
         while offset < self.code.len() {
-            offset = self.disassemble_instruction(offset);
+            offset = self.disassemble_instruction_to_string(offset, &mut output);
+        }
+        
+        if let Ok(mut file) = File::create("bytecode.txt") {
+            let _ = file.write_all(output.as_bytes());
+        } else {
         }
     }
     
-    fn disassemble_instruction(&self, offset: usize) -> usize {
-        print!("{:04} ", offset);
+    fn disassemble_instruction_to_string(&self, offset: usize, output: &mut String) -> usize {
+        output.push_str(&format!("{:04} ", offset));
         
         match &self.code[offset] {
             OpCode::LoadConst(idx) => {
-                println!("LoadConst {} ({:?})", idx, self.constants.get(*idx));
+                output.push_str(&format!("LoadConst {} ({:?})\n", idx, self.constants.get(*idx)));
                 offset + 1
             }
             OpCode::LoadTrue => {
-                println!("LoadTrue");
+                output.push_str("LoadTrue\n");
                 offset + 1
             }
             OpCode::LoadFalse => {
-                println!("LoadFalse");
+                output.push_str("LoadFalse\n");
                 offset + 1
             }
             OpCode::LoadNull => {
-                println!("LoadNull");
+                output.push_str("LoadNull\n");
                 offset + 1
             }
             OpCode::GetGlobal(idx) => {
-                println!("GetGlobal {}", idx);
+                output.push_str(&format!("GetGlobal {}\n", idx));
                 offset + 1
             }
             OpCode::SetGlobal(idx) => {
-                println!("SetGlobal {}", idx);
+                output.push_str(&format!("SetGlobal {}\n", idx));
                 offset + 1
             }
             OpCode::GetLocal(idx) => {
-                println!("GetLocal {}", idx);
+                output.push_str(&format!("GetLocal {}\n", idx));
                 offset + 1
             }
             OpCode::SetLocal(idx) => {
-                println!("SetLocal {}", idx);
+                output.push_str(&format!("SetLocal {}\n", idx));
                 offset + 1
             }
             OpCode::Add => {
-                println!("Add");
+                output.push_str("Add\n");
                 offset + 1
             }
             OpCode::Subtract => {
-                println!("Subtract");
+                output.push_str("Subtract\n");
                 offset + 1
             }
             OpCode::Multiply => {
-                println!("Multiply");
+                output.push_str("Multiply\n");
                 offset + 1
             }
             OpCode::Divide => {
-                println!("Divide");
+                output.push_str("Divide\n");
                 offset + 1
             }
             OpCode::Modulo => {
-                println!("Modulo");
+                output.push_str("Modulo\n");
                 offset + 1
             }
             OpCode::Negate => {
-                println!("Negate");
+                output.push_str("Negate\n");
                 offset + 1
             }
             OpCode::Equal => {
-                println!("Equal");
+                output.push_str("Equal\n");
                 offset + 1
             }
             OpCode::NotEqual => {
-                println!("NotEqual");
+                output.push_str("NotEqual\n");
                 offset + 1
             }
             OpCode::Greater => {
-                println!("Greater");
+                output.push_str("Greater\n");
                 offset + 1
             }
             OpCode::GreaterEqual => {
-                println!("GreaterEqual");
+                output.push_str("GreaterEqual\n");
                 offset + 1
             }
             OpCode::Less => {
-                println!("Less");
+                output.push_str("Less\n");
                 offset + 1
             }
             OpCode::LessEqual => {
-                println!("LessEqual");
+                output.push_str("LessEqual\n");
                 offset + 1
             }
             OpCode::Jump(addr) => {
-                println!("Jump -> {}", addr);
+                output.push_str(&format!("Jump -> {}\n", addr));
                 offset + 1
             }
             OpCode::JumpIfFalse(addr) => {
-                println!("JumpIfFalse -> {}", addr);
+                output.push_str(&format!("JumpIfFalse -> {}\n", addr));
                 offset + 1
             }
             OpCode::JumpIfTrue(addr) => {
-                println!("JumpIfTrue -> {}", addr);
+                output.push_str(&format!("JumpIfTrue -> {}\n", addr));
                 offset + 1
             }
             OpCode::Loop(addr) => {
-                println!("Loop -> {}", addr);
+                output.push_str(&format!("Loop -> {}\n", addr));
                 offset + 1
             }
             OpCode::Call(arg_count) => {
-                println!("Call {}", arg_count);
+                output.push_str(&format!("Call {}\n", arg_count));
                 offset + 1
             }
             OpCode::Return => {
-                println!("Return");
+                output.push_str("Return\n");
                 offset + 1
             }
             OpCode::MakeList(count) => {
-                println!("MakeList {}", count);
+                output.push_str(&format!("MakeList {}\n", count));
                 offset + 1
             }
             OpCode::BuildRange => {
-                println!("BuildRange");
+                output.push_str("BuildRange\n");
                 offset + 1
             }
             OpCode::GetIndex => {
-                println!("GetIndex");
+                output.push_str("GetIndex\n");
                 offset + 1
             }
             OpCode::DefineClass(name_idx) => {
-                println!("DefineClass {}", name_idx);
+                output.push_str(&format!("DefineClass {}\n", name_idx));
                 offset + 1
             }
             OpCode::GetProperty(name_idx) => {
-                println!("GetProperty {}", name_idx);
+                output.push_str(&format!("GetProperty {}\n", name_idx));
                 offset + 1
             }
             OpCode::SetProperty(name_idx) => {
-                println!("SetProperty {}", name_idx);
+                output.push_str(&format!("SetProperty {}\n", name_idx));
                 offset + 1
             }
             OpCode::GetSuper(method_idx) => {
-                println!("GetSuper {}", method_idx);
+                output.push_str(&format!("GetSuper {}\n", method_idx));
                 offset + 1
             }
             OpCode::Inherit => {
-                println!("Inherit");
+                output.push_str("Inherit\n");
                 offset + 1
             }
             OpCode::Pop => {
-                println!("Pop");
+                output.push_str("Pop\n");
                 offset + 1
             }
             OpCode::Print => {
-                println!("Print");
+                output.push_str("Print\n");
                 offset + 1
             }
             OpCode::Dup => {
-                println!("Dup");
+                output.push_str("Dup\n");
                 offset + 1
             }
             OpCode::MetalInit => {
-                println!("MetalInit");
+                output.push_str("MetalInit\n");
                 offset + 1
             }
             OpCode::MetalLoadKernel(idx) => {
-                println!("MetalLoadKernel {}", idx);
+                output.push_str(&format!("MetalLoadKernel {}\n", idx));
+                offset + 1
+            }
+            OpCode::MetalExecute => {
+                output.push_str("MetalExecute\n");
+                offset + 1
+            }
+            OpCode::CudaInit => {
+                output.push_str("CudaInit\n");
+                offset + 1
+            }
+            OpCode::CudaLoadKernel(idx) => {
+                output.push_str(&format!("CudaLoadKernel {}\n", idx));
+                offset + 1
+            }
+            OpCode::CudaExecute => {
+                output.push_str("CudaExecute\n");
                 offset + 1
             }
         }

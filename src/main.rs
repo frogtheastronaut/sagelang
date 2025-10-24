@@ -1,3 +1,4 @@
+
 mod lexer;
 mod parser;
 mod interpreter;
@@ -6,10 +7,8 @@ mod vm;
 mod error;
 mod gpu;
 
-use std::fs;
-use std::env;
+use std::{env, fs};
 use crate::error::errormsg;
-use colored::Colorize;
 
 fn main() {
     let args: Vec<String> = env::args().collect();
@@ -18,24 +17,30 @@ fn main() {
         return;
     }
     let filename = &args[1];
-    let debug = args.len() > 2 && args[2] == "--debug";
+    let debug = args.get(2).map_or(false, |f| f == "--debug");
 
-    let contents = fs::read_to_string(filename)
-        .expect("Something went wrong reading the file");
+    let contents = match fs::read_to_string(filename) {
+        Ok(c) => c,
+        Err(_) => {
+            eprintln!("[ERR] Failed to read file: {}", filename);
+            return;
+        }
+    };
 
     let mut lexer = lexer::Lexer::new(&contents);
     let mut tokenizer = lexer::Tokenizer::new(&mut lexer);
     let mut parser = parser::Parser::new(&mut tokenizer);
-
     let ast = parser.parse();
-    
+
     if debug {
         let ast_str = format!("{:?}", ast);
-        fs::write("ast.txt", ast_str).expect("[ERR] Failed to write AST");
-        println!("{} {}", "[DEBUG]".bright_blue(), "AST written to ast.txt");
+        if fs::write("ast.txt", ast_str).is_err() {
+            eprintln!("[ERR] Failed to write AST");
+        }
     }
 
     let mut compiler = compiler::Compiler::new();
+    compiler.debug = debug;
     let chunk = match compiler.compile(&ast) {
         Ok(chunk) => chunk,
         Err(e) => {
@@ -45,17 +50,9 @@ fn main() {
 
     let mut vm = vm::VM::new();
     vm.debug = debug;
-    
     if let Err(e) = vm.run(chunk) {
-        if let Some(line_str) = e.strip_suffix(']').and_then(|s| s.rsplit("[line ").next()) {
-            if let Ok(line) = line_str.parse::<usize>() {
-                let message = e.split(" [line ").next().unwrap_or(&e);
-                errormsg::runtime_error(message, line);
-            } else {
-                errormsg::runtime_error(&e, 0);
-            }
-        } else {
-            errormsg::runtime_error(&e, 0);
-        }
+        let line = e.rsplit("[line ").next().and_then(|s| s.trim_end_matches(']').parse::<usize>().ok()).unwrap_or(0);
+        let message = e.split(" [line ").next().unwrap_or(&e);
+        errormsg::runtime_error(message, line);
     }
 }

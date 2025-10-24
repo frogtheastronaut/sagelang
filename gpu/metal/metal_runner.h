@@ -14,16 +14,14 @@ typedef struct {
 } MetalInitResult;
 
 typedef struct {
-    float* input_data;
-    size_t input_size;
-    float* output_data;
-    size_t output_size;
-} MetalBuffer;
+    float* data;
+    int size;
+} MetalExecuteResult;
 
 MetalInitResult metal_init(void);
-void metal_cleanup(void);
-int metal_execute_kernel(const char* kernel_source, MetalBuffer* buffers, size_t buffer_count);
 int metal_is_available(void);
+MetalExecuteResult metal_execute_kernel(const char* kernel_source, float* input_data, int data_size);
+void metal_free_result(MetalExecuteResult result);
 
 #ifdef __cplusplus
 }

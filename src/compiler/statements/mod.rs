@@ -10,3 +10,4 @@ mod function_stmt;
 mod return_stmt;
 mod class_stmt;
 mod use_metal;
+mod use_cuda;

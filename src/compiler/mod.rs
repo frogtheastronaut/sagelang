@@ -13,6 +13,7 @@ pub struct Compiler {
     pub current_class: Option<String>,
     pub current_superclass: Option<String>,
     pub current_line: usize,
+    pub debug: bool,
 }
 
 impl Compiler {
@@ -25,6 +26,7 @@ impl Compiler {
             current_class: None,
             current_superclass: None,
             current_line: 0,
+            debug: false,
         }
     }
     
@@ -53,6 +55,7 @@ impl Compiler {
             Stmt::Return { value: expr, .. } => self.compile_return_stmt(expr),
             Stmt::Class { name, superclass, fields, methods, .. } => self.compile_class_stmt(name, superclass, fields, methods),
             Stmt::UseMetal { kernel_code, body, .. } => self.compile_use_metal(kernel_code, body),
+            Stmt::UseCuda { kernel_code, body, .. } => self.compile_use_cuda(kernel_code, body),
         }
     }
     
@@ -108,6 +111,56 @@ impl Compiler {
                 *addr = jump;
             }
             _ => {}
+        }
+    }
+    
+    fn gpu_extract_operation(&self, expr: &Expr, data_var: &str) -> Option<String> {
+        use crate::lexer::tokens::Token;
+        
+        match expr {
+            Expr::BinaryOp { left, op, right, .. } => {
+                let left_str = self.gpu_expr_to_string(left, data_var)?;
+                let right_str = self.gpu_expr_to_string(right, data_var)?;
+                let op_str = match op {
+                    Token::Plus => "+",
+                    Token::Minus => "-",
+                    Token::Star => "*",
+                    Token::Slash => "/",
+                    Token::Percent => "%",
+                    _ => return None,
+                };
+                Some(format!("{} {} {}", left_str, op_str, right_str))
+            }
+            _ => self.gpu_expr_to_string(expr, data_var),
+        }
+    }
+    
+    fn gpu_expr_to_string(&self, expr: &Expr, data_var: &str) -> Option<String> {
+        use crate::lexer::tokens::Token;
+        
+        match expr {
+            Expr::Number { value, .. } => Some(format!("{}", value)),
+            Expr::Identifier { name, .. } => {
+                if name == "data" || name.starts_with("data") {
+                    Some(data_var.to_string())
+                } else {
+                    Some(name.clone())
+                }
+            }
+            Expr::BinaryOp { left, op, right, .. } => {
+                let left_str = self.gpu_expr_to_string(left, data_var)?;
+                let right_str = self.gpu_expr_to_string(right, data_var)?;
+                let op_str = match op {
+                    Token::Plus => "+",
+                    Token::Minus => "-",
+                    Token::Star => "*",
+                    Token::Slash => "/",
+                    Token::Percent => "%",
+                    _ => return None,
+                };
+                Some(format!("({} {} {})", left_str, op_str, right_str))
+            }
+            _ => None,
         }
     }
 }

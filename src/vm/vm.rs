@@ -80,9 +80,7 @@ impl VM {
             let instruction = self.frames[frame_idx].chunk.code[ip].clone();
             self.frames[frame_idx].ip += 1;
             
-            if self.debug {
-                println!("[DEBUG] Stack before {:?}: {:?}", instruction, self.stack);
-            }
+
             
             match instruction {
                 OpCode::LoadConst(idx) => {
@@ -549,20 +547,16 @@ impl VM {
                                 use crate::parser::ast::AccessModifier;
                                 match access {
                                     AccessModifier::Private => {
-                                        // private: only accessible within same class
                                         if current_context.as_ref() != Some(&class_name) {
                                             return Err(self.runtime_error(&format!("Cannot set private field '{}' from outside class", prop_name)));
                                         }
                                     }
                                     AccessModifier::Protected => {
-                                        // protected: accessible within class and subclasses
                                         if current_context.is_none() {
                                             return Err(self.runtime_error(&format!("Cannot set protected field '{}' from outside class hierarchy", prop_name)));
                                         }
                                     }
                                     AccessModifier::Public => {
-                                        // public: accessible from anywhere
-                                        // don't do anything here
                                     }
                                 }
                             }
@@ -627,13 +621,11 @@ impl VM {
                                 merged_methods.insert(method_name, method_value);
                             }
                             
-                            // merge static methods
                             let mut merged_static_methods = super_static_methods.clone();
                             for (method_name, method_value) in subclass_static_methods {
                                 merged_static_methods.insert(method_name, method_value);
                             }
                             
-                            // merge access modifiers
                             let mut merged_field_access = super_field_access.clone();
                             for (field_name, access) in subclass_field_access {
                                 merged_field_access.insert(field_name, access);
@@ -682,13 +674,14 @@ impl VM {
                 }
                 
                 OpCode::MetalInit => {
-                    if let Err(e) = self.gpu_state.init() {
-                        if self.debug {
-                            eprintln!("[DEBUG] Metal initialization failed: {}", e);
-                            eprintln!("[DEBUG] Falling back to CPU execution");
+                    match self.gpu_state.init() {
+                        Ok(()) => {
+                            // Metal initialized successfully
                         }
-                        // Continue execution on CPU instead of failing
-                        self.gpu_state.initialized = false;
+                        Err(e) => {
+                            println!("[GPU] Metal initialization failed: {}", e);
+                            self.gpu_state.initialized = false;
+                        }
                     }
                 }
                 
@@ -697,9 +690,131 @@ impl VM {
                         .ok_or("Invalid kernel constant index")?;
                     
                     if let Value::String(kernel_code) = kernel_value {
-                        self.gpu_state.load_kernel(kernel_code.clone());
+                        if let Err(e) = self.gpu_state.load_kernel(kernel_code.clone()) {
+                            if self.debug {
+                                eprintln!("[DEBUG] Failed to load Metal kernel: {}", e);
+                            }
+                            return Err(self.runtime_error(&format!("Metal kernel load failed: {}", e)));
+                        }
                     } else {
                         return Err(self.runtime_error("Metal kernel must be a string"));
+                    }
+                }
+                
+                OpCode::CudaInit => {
+                    if let Err(e) = self.gpu_state.init() {
+                        if self.debug {
+                            eprintln!("[DEBUG] CUDA initialization failed: {}", e);
+                            eprintln!("[DEBUG] Falling back to CPU execution");
+                        }
+                        // Continue execution on CPU instead of failing
+                        self.gpu_state.initialized = false;
+                    }
+                }
+                
+                OpCode::CudaLoadKernel(idx) => {
+                    let kernel_value = self.frames[frame_idx].chunk.constants.get(idx)
+                        .ok_or("Invalid kernel constant index")?;
+                    
+                    if let Value::String(kernel_code) = kernel_value {
+                        if let Err(e) = self.gpu_state.load_kernel(kernel_code.clone()) {
+                            if self.debug {
+                                eprintln!("[DEBUG] Failed to load CUDA kernel: {}", e);
+                            }
+                            return Err(self.runtime_error(&format!("CUDA kernel load failed: {}", e)));
+                        }
+                    } else {
+                        return Err(self.runtime_error("CUDA kernel must be a string"));
+                    }
+                }
+                
+                OpCode::MetalExecute => {
+                    if self.gpu_state.initialized {
+                        // Extract numeric data from stack
+                        let mut input_data: Vec<f32> = Vec::new();
+                        for value in &self.stack {
+                            match value {
+                                Value::Number(n) => input_data.push(*n as f32),
+                                Value::List(items) => {
+                                    for item in items {
+                                        if let Value::Number(n) = item {
+                                            input_data.push(*n as f32);
+                                        }
+                                    }
+                                }
+                                _ => {}
+                            }
+                        }
+                        if input_data.is_empty() {
+                            input_data = vec![1.0, 2.0, 3.0, 4.0, 5.0];
+                        }
+                        match self.gpu_state.execute(&input_data) {
+                            Ok(results) => {
+                                if self.debug {
+                                    println!("[DEBUG] Metal GPU execution details:");
+                                    println!("[DEBUG]   Backend: {:?}", self.gpu_state.backend);
+                                    println!("[DEBUG]   Input size: {} elements", input_data.len());
+                                    println!("[DEBUG]   Output size: {} elements", results.len());
+                                    for (i, val) in results.iter().enumerate() {
+                                        println!("[DEBUG]   Thread {}: {}", i, val);
+                                    }
+                                }
+                                let result_values: Vec<Value> = results.iter()
+                                    .map(|f| Value::Number(*f as f64))
+                                    .collect();
+                                self.stack.push(Value::List(result_values));
+                            }
+                            Err(e) => {
+                                if self.debug {
+                                    eprintln!("[DEBUG] GPU execution failed: {}", e);
+                                }
+                            }
+                        }
+                    }
+                }
+                
+                OpCode::CudaExecute => {
+                    if self.gpu_state.initialized {
+                        // Extract numeric data from stack
+                        let mut input_data: Vec<f32> = Vec::new();
+                        for value in &self.stack {
+                            match value {
+                                Value::Number(n) => input_data.push(*n as f32),
+                                Value::List(items) => {
+                                    for item in items {
+                                        if let Value::Number(n) = item {
+                                            input_data.push(*n as f32);
+                                        }
+                                    }
+                                }
+                                _ => {}
+                            }
+                        }
+                        if input_data.is_empty() {
+                            input_data = vec![1.0, 2.0, 3.0, 4.0, 5.0];
+                        }
+                        match self.gpu_state.execute(&input_data) {
+                            Ok(results) => {
+                                if self.debug {
+                                    println!("[DEBUG] CUDA GPU execution details:");
+                                    println!("[DEBUG]   Backend: {:?}", self.gpu_state.backend);
+                                    println!("[DEBUG]   Input size: {} elements", input_data.len());
+                                    println!("[DEBUG]   Output size: {} elements", results.len());
+                                    for (i, val) in results.iter().enumerate() {
+                                        println!("[DEBUG]   Thread {}: {}", i, val);
+                                    }
+                                }
+                                let result_values: Vec<Value> = results.iter()
+                                    .map(|f| Value::Number(*f as f64))
+                                    .collect();
+                                self.stack.push(Value::List(result_values));
+                            }
+                            Err(e) => {
+                                if self.debug {
+                                    eprintln!("[DEBUG] GPU execution failed: {}", e);
+                                }
+                            }
+                        }
                     }
                 }
             }
