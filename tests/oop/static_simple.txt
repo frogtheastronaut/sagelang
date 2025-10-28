@@ -1,9 +1,0 @@
-// Simple static method test
-
-class MathUtils {
-    static function add(a, b) {
-        return a + b;
-    }
-}
-
-print MathUtils.add(5, 3);

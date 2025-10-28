@@ -1,8 +1,0 @@
-class Test {
-    function constructor(n) {
-        print "Constructor called";
-        print n;
-    }
-}
-
-let t = Test("hello");
