@@ -1,0 +1,12 @@
+let numbers = [1, 2, 3, 4, 5];
+
+function sum(nums) {
+    let total = 0;
+    for (n in nums) {
+        total = total + n;
+    }
+    return total;
+}
+// sum of list
+// assuming all are numbers
+print(sum(numbers));

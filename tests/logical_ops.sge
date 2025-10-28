@@ -1,0 +1,19 @@
+// Test logical operators with short-circuit evaluation
+print(true && true);
+print(true && false);
+print(false && true);
+print(false && false);
+
+print(true || true);
+print(true || false);
+print(false || true);
+print(false || false);
+
+// Test short-circuit evaluation
+let x = 5;
+let result = (x > 3) && (x < 10);
+print(result);
+
+let y = 15;
+let result2 = (y < 10) || (y > 20);
+print(result2);

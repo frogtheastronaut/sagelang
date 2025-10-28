@@ -1,0 +1,54 @@
+// Test private access modifier
+// Private members can only be accessed within the same class
+
+class BankAccount {
+    private balance;
+    
+    function constructor(initialBalance) {
+        this.balance = initialBalance;
+    }
+    
+    public function getBalance() {
+        return this.balance;
+    }
+    
+    public function deposit(amount) {
+        if amount > 0 {
+            this.balance = this.balance + amount;
+            print "Deposited: " + amount;
+        }
+    }
+    
+    private function validateAmount(amount) {
+        return amount > 0;
+    }
+    
+    public function withdraw(amount) {
+        if this.validateAmount(amount) {
+            if this.balance >= amount {
+                this.balance = this.balance - amount;
+                print "Withdrawn: " + amount;
+                return true;
+            } else {
+                print "Insufficient funds";
+                return false;
+            }
+        } else {
+            print "Invalid amount";
+            return false;
+        }
+    }
+}
+
+let account = new BankAccount(1000);
+print "Initial balance: " + account.getBalance();
+
+account.deposit(500);
+print "Balance after deposit: " + account.getBalance();
+
+account.withdraw(300);
+print "Balance after withdrawal: " + account.getBalance();
+
+// These should fail - private access
+// print account.balance;  // Error: Cannot access private field
+// account.validateAmount(100);  // Error: Cannot access private method

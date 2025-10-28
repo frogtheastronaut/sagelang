@@ -1,0 +1,53 @@
+// Basic class with encapsulation
+class Animal {
+    function constructor(n) {
+        this.name = n;
+        this.energy = 100;
+    }
+    
+    function speak() {
+        print "Animal makes a sound";
+    }
+    
+    function eat() {
+        this.energy = this.energy + 10;
+        print this.name + " is eating. Energy: ";
+        print this.energy;
+    }
+}
+
+// Inheritance and polymorphism
+class Dog < Animal {
+    function constructor(n, b) {
+        this.name = n;
+        this.energy = 100;
+        this.breed = b;
+    }
+    
+    function speak() {
+        print this.name + " barks: Woof!";
+    }
+    
+    function wagTail() {
+        print this.name + " is wagging its tail!";
+    }
+}
+
+// Test instantiation and encapsulation
+let genericAnimal = Animal("Generic");
+genericAnimal.speak();
+genericAnimal.eat();
+
+print "---";
+
+// Test inheritance
+let myDog = Dog("Buddy", "Golden Retriever");
+myDog.speak();  // Polymorphism - overridden method
+myDog.eat();    // Inherited method
+myDog.wagTail(); // Dog-specific method
+
+print "---";
+
+// Test property access
+print "Dog's name: " + myDog.name;
+print "Dog's breed: " + myDog.breed;

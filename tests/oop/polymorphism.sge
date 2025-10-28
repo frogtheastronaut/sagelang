@@ -1,0 +1,68 @@
+// Test polymorphism - method overriding
+// Subclasses can override parent methods to provide specific behavior
+
+class Shape {
+    function constructor(name) {
+        this.name = name;
+    }
+    
+    public function area(dummy) {
+        print "Area calculation not implemented for base Shape";
+        return 0;
+    }
+    
+    public function describe(dummy) {
+        print "This is a " + this.name;
+    }
+}
+
+class Rectangle < Shape {
+    function constructor(width, height) {
+        this.name = "Rectangle";
+        this.width = width;
+        this.height = height;
+    }
+    
+    public function area(dummy) {
+        return this.width * this.height;
+    }
+}
+
+class Circle < Shape {
+    function constructor(radius) {
+        this.name = "Circle";
+        this.radius = radius;
+    }
+    
+    public function area(dummy) {
+        return 3.14159 * this.radius * this.radius;
+    }
+}
+
+class Triangle < Shape {
+    function constructor(base, height) {
+        this.name = "Triangle";
+        this.base = base;
+        this.height = height;
+    }
+    
+    public function area(dummy) {
+        return 0.5 * this.base * this.height;
+    }
+}
+
+// Polymorphism in action - same method, behavior
+let rect = Rectangle(5, 10);
+let circ = Circle(7);
+let tri = Triangle(6, 8);
+
+rect.describe(0);
+print "Area: " + rect.area(0);
+print "---";
+
+circ.describe(0);
+print "Area: " + circ.area(0);
+print "---";
+
+tri.describe(0);
+print "Area: " + tri.area(0);

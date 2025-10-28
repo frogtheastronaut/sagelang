@@ -1,0 +1,119 @@
+// Test encapsulation with access modifiers - similar to Medium article examples
+
+class Animal {
+    // Private field - should only be accessible within Animal class
+    private numberOfLegs;
+    
+    // Public fields
+    public name;
+    
+    function constructor(n, legs) {
+        this.name = n;
+        this.numberOfLegs = legs;
+    }
+    
+    // Public method - accessible from anywhere
+    public function getNumberOfLegs() {
+        return this.numberOfLegs;
+    }
+    
+    // Public method - accessible from anywhere
+    public function setNumberOfLegs(legs) {
+        this.numberOfLegs = legs;
+    }
+    
+    // Public method
+    public function describe() {
+        print this.name + " has " + this.numberOfLegs + " legs";
+    }
+}
+
+print "=== Creating Animal ===";
+let dog = Animal("Buddy", 4);
+dog.describe();
+
+print "";
+print "=== Accessor/Mutator Pattern ===";
+print "Number of legs (getter): " + dog.getNumberOfLegs();
+dog.setNumberOfLegs(3);
+print "After setting to 3: " + dog.getNumberOfLegs();
+dog.describe();
+
+print "";
+print "=== Protected Access in Inheritance ===";
+
+class Mammal {
+    protected species;
+    public name;
+    
+    function constructor(n, s) {
+        this.name = n;
+        this.species = s;
+    }
+    
+    protected function getSpecies() {
+        return this.species;
+    }
+    
+    public function identify() {
+        print this.name + " is a " + this.species;
+    }
+}
+
+class Cat < Mammal {
+    function constructor(n) {
+        this.name = n;
+        this.species = "Felis catus";
+    }
+    
+    public function meow() {
+        print this.name + " (species: " + this.species + ") says: Meow!";
+    }
+}
+
+let myCat = Cat("Whiskers");
+myCat.identify();
+myCat.meow();
+
+print "";
+print "=== Private Fields Test ===";
+class BankAccount {
+    private balance;
+    public accountHolder;
+    
+    function constructor(holder, initial) {
+        this.accountHolder = holder;
+        this.balance = initial;
+    }
+    
+    public function deposit(amount) {
+        this.balance = this.balance + amount;
+        print "Deposited " + amount + ". New balance: " + this.balance;
+    }
+    
+    public function getBalance() {
+        return this.balance;
+    }
+    
+    // Private method - only accessible within class
+    private function validateWithdrawal(amount) {
+        return this.balance >= amount;
+    }
+    
+    public function withdraw(amount) {
+        let canWithdraw = this.validateWithdrawal(amount);
+        if (canWithdraw) {
+            this.balance = this.balance - amount;
+            print "Withdrew " + amount + ". New balance: " + this.balance;
+        } else {
+            print "Insufficient funds!";
+        }
+    }
+}
+
+let account = BankAccount("Alice", 1000);
+print "Account holder: " + account.accountHolder;
+print "Initial balance: " + account.getBalance();
+account.deposit(500);
+account.withdraw(200);
+account.withdraw(2000);

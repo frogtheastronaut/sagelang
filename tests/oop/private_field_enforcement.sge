@@ -1,0 +1,23 @@
+// Test that access modifiers are actually enforced
+
+class BankAccount {
+    private balance;
+    public accountHolder;
+    
+    function constructor(holder, initial) {
+        this.accountHolder = holder;
+        this.balance = initial;
+    }
+    
+    public function getBalance() {
+        return this.balance;
+    }
+}
+
+let account = BankAccount("Alice", 1000);
+
+print "Account holder (public): " + account.accountHolder;
+
+print "Trying to access private field directly...";
+// This should fail because balance is private
+print account.balance;

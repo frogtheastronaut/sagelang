@@ -1,3 +1,5 @@
 /target
 ast.txt
 bytecode.txt
+.DS_Store
+*/.DS_Store

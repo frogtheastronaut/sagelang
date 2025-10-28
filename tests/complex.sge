@@ -1,0 +1,28 @@
+// complex bit of code
+// this should print nothing
+
+let x = 10;
+let list_test = [1, 2, 3];
+let list_mixed = [1, 2, "test"];
+let string_test = "Hello, world!";
+let complex_arithmetic = 2 * (3 + 5); let stacked_var = "stacked"; // stacked code
+
+if (x >= 5) {
+    return x == 10;
+} else {
+    for (x in list_test) {
+        if (x == x || x == x) {
+            x = 5;
+            return test(x);
+        }
+
+    }
+    while (x > 5) {
+        return test(x);
+    }
+
+}
+
+function test(num x, bool unused, str literal) {
+    return x == 5;
+}

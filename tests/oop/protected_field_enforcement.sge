@@ -1,0 +1,34 @@
+// Test protected access - should work in subclass but not outside
+
+class Animal {
+    protected energy;
+    public name;
+    
+    function constructor(n) {
+        this.name = n;
+        this.energy = 100;
+    }
+    
+    protected function getEnergy() {
+        return this.energy;
+    }
+}
+
+class Dog < Animal {
+    function constructor(n) {
+        this.name = n;
+        this.energy = 100;
+    }
+    
+    public function showEnergy() {
+        // Should work - accessing protected field from subclass
+        print this.name + " has energy: " + this.energy;
+    }
+}
+
+let dog = Dog("Buddy");
+dog.showEnergy();
+
+print "Trying to access protected field from outside...";
+// This should fail because energy is protected
+print dog.energy;

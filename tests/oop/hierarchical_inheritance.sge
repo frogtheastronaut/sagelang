@@ -1,0 +1,10 @@
+class Test {
+    function constructor(n) {
+        print "Setting property";
+        this.name = n;
+        print "Property set";
+    }
+}
+
+let t = Test("hello");
+print t.name;
